@@ -52,9 +52,10 @@ interface PropertyTableProps {
   properties: Property[];
   onEdit: (property: Property) => void;
   onDelete: (propertyId: number) => void;
+  onView: (property: Property) => void;
 }
 
-export const PropertyTable = ({ properties, onEdit, onDelete }: PropertyTableProps) => {
+export const PropertyTable = ({ properties, onEdit, onDelete, onView }: PropertyTableProps) => {
   const [deleteProperty, setDeleteProperty] = useState<Property | null>(null);
 
   const getPropertyIcon = (type: string) => {
@@ -182,7 +183,7 @@ export const PropertyTable = ({ properties, onEdit, onDelete }: PropertyTablePro
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem onClick={() => console.log('View property', property.id)}>
+                      <DropdownMenuItem onClick={() => onView(property)}>
                         <Eye className="h-4 w-4 mr-2" />
                         View Details
                       </DropdownMenuItem>

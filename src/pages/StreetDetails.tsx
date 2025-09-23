@@ -21,7 +21,19 @@ import {
 } from 'lucide-react';
 import { PropertyForm } from '@/components/properties/PropertyForm';
 import { PropertyTable } from '@/components/properties/PropertyTable';
+import { PropertyDetails } from '@/components/properties/PropertyDetails';
 import { StreetOverview } from '@/components/street/StreetOverview';
+import { StreetEditForm } from '@/components/street/StreetEditForm';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 // Mock data
 const mockStreetData = {
@@ -86,6 +98,9 @@ const StreetDetails = () => {
   const navigate = useNavigate();
   const [showPropertyForm, setShowPropertyForm] = useState(false);
   const [editingProperty, setEditingProperty] = useState<any>(null);
+  const [viewingProperty, setViewingProperty] = useState<any>(null);
+  const [showStreetEditForm, setShowStreetEditForm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   const streetId = parseInt(id || '1');
@@ -128,8 +143,35 @@ const StreetDetails = () => {
     setShowPropertyForm(true);
   };
 
+  const handleViewProperty = (property: any) => {
+    setViewingProperty(property);
+  };
+
   const handleDeleteProperty = (propertyId: number) => {
     console.log('Deleting property:', propertyId);
+    // Here you would typically make an API call to delete the property
+    // For now, we'll just show a success message
+  };
+
+  const handleEditStreet = () => {
+    setShowStreetEditForm(true);
+  };
+
+  const handleStreetSubmit = (streetData: any) => {
+    console.log('Updating street:', streetData);
+    // Here you would typically make an API call to update the street
+  };
+
+  const handleDeleteStreet = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteStreet = () => {
+    console.log('Deleting street:', street.id);
+    // Here you would typically make an API call to delete the street
+    // Then navigate back to dashboard
+    setShowDeleteConfirm(false);
+    navigate('/dashboard');
   };
 
   const filteredProperties = street.properties.filter(property =>
@@ -169,7 +211,7 @@ const StreetDetails = () => {
             </div>
             
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleEditStreet}>
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Street
               </Button>
@@ -177,6 +219,7 @@ const StreetDetails = () => {
                 variant="destructive" 
                 size="sm"
                 className="hidden sm:flex"
+                onClick={handleDeleteStreet}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete Street
@@ -238,6 +281,7 @@ const StreetDetails = () => {
                 properties={filteredProperties}
                 onEdit={handleEditProperty}
                 onDelete={handleDeleteProperty}
+                onView={handleViewProperty}
               />
             </CardContent>
           </Card>
@@ -256,6 +300,47 @@ const StreetDetails = () => {
           }}
         />
       )}
+
+      {/* Property Details Modal */}
+      {viewingProperty && (
+        <PropertyDetails
+          property={viewingProperty}
+          streetName={street.name}
+          onClose={() => setViewingProperty(null)}
+          onEdit={handleEditProperty}
+          onDelete={handleDeleteProperty}
+        />
+      )}
+
+      {/* Street Edit Form Modal */}
+      {showStreetEditForm && (
+        <StreetEditForm
+          street={street}
+          onClose={() => setShowStreetEditForm(false)}
+          onSubmit={handleStreetSubmit}
+        />
+      )}
+
+      {/* Delete Street Confirmation */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Street</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{street.name}"? This action cannot be undone and will permanently remove the street and all associated properties from the system.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteStreet}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Delete Street
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

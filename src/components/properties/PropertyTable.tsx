@@ -60,13 +60,13 @@ export const PropertyTable = ({ properties, onEdit, onDelete }: PropertyTablePro
   const getPropertyIcon = (type: string) => {
     switch (type.toLowerCase()) {
       case 'house':
-        return <Home className="h-4 w-4 text-blue-500" />;
+        return <Home className="h-4 w-4 text-primary" />;
       case 'shop':
-        return <Store className="h-4 w-4 text-green-500" />;
+        return <Store className="h-4 w-4 text-success" />;
       case 'hotel':
-        return <Hotel className="h-4 w-4 text-purple-500" />;
+        return <Hotel className="h-4 w-4 text-warning" />;
       default:
-        return <Building className="h-4 w-4 text-gray-500" />;
+        return <Building className="h-4 w-4 text-muted-foreground" />;
     }
   };
 

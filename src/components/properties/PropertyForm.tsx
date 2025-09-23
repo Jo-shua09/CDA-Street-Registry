@@ -115,9 +115,9 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
 
   const getFileIcon = (file: File) => {
     if (file.type.startsWith('image/')) {
-      return <FileImage className="h-4 w-4 text-blue-500" />;
+      return <FileImage className="h-4 w-4 text-primary" />;
     }
-    return <File className="h-4 w-4 text-gray-500" />;
+    return <File className="h-4 w-4 text-muted-foreground" />;
   };
 
   const formatFileSize = (bytes: number) => {

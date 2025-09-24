@@ -4,13 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -29,6 +22,13 @@ interface Street {
   lcda: string;
   registrationDate: string;
   description: string;
+  properties: Array<{ type: string }>;
+  propertyCount?: {
+    houses: number;
+    shops: number;
+    hotels: number;
+    others: number;
+  };
 }
 
 interface StreetEditFormProps {
@@ -36,48 +36,6 @@ interface StreetEditFormProps {
   onClose: () => void;
   onSubmit: (streetData: Street) => void;
 }
-
-const cdaOptions = [
-  "Phase 1 CDA",
-  "Victoria CDA", 
-  "Ikeja CDA",
-  "Ikoyi CDA",
-  "Lekki CDA",
-  "Gbagada CDA"
-];
-
-const stateOptions = [
-  "Lagos State",
-  "Abuja FCT",
-  "Rivers State",
-  "Ogun State",
-  "Kano State",
-  "Kaduna State"
-];
-
-const lgOptions = [
-  "Lagos Island LGA",
-  "Lagos Mainland LGA", 
-  "Surulere LGA",
-  "Ikeja LGA",
-  "Alimosho LGA",
-  "Ikorodu LGA",
-  "Kosofe LGA",
-  "Mushin LGA",
-  "Oshodi-Isolo LGA",
-  "Shomolu LGA"
-];
-
-const lcdaOptions = [
-  "Ikoyi/Obalende LCDA",
-  "Lagos Island East LCDA",
-  "Victoria Island LCDA",
-  "Lekki LCDA",
-  "Ikeja LCDA",
-  "Allen Avenue LCDA",
-  "Agege LCDA",
-  "Surulere LCDA"
-];
 
 export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProps) => {
   const [formData, setFormData] = useState({
@@ -87,11 +45,17 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
     lg: street.lg,
     lcda: street.lcda,
     description: street.description,
+    houses: street.propertyCount?.houses || 0,
+    shops: street.propertyCount?.shops || 0,
+    hotels: street.propertyCount?.hotels || 0,
+    others: street.propertyCount?.others || 0,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleInputChange = (field: string, value: string) => {
+  const totalProperties = formData.houses + formData.shops + formData.hotels + formData.others;
+
+  const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -115,7 +79,18 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
       
       const updatedStreet = {
         ...street,
-        ...formData,
+        name: formData.name,
+        cda: formData.cda,
+        state: formData.state,
+        lg: formData.lg,
+        lcda: formData.lcda,
+        description: formData.description,
+        propertyCount: {
+          houses: formData.houses,
+          shops: formData.shops,
+          hotels: formData.hotels,
+          others: formData.others,
+        },
       };
 
       onSubmit(updatedStreet);
@@ -161,66 +136,99 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
 
           <div className="space-y-2">
             <Label htmlFor="state">State *</Label>
-            <Select value={formData.state} onValueChange={(value) => handleInputChange('state', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select State" />
-              </SelectTrigger>
-              <SelectContent>
-                {stateOptions.map((state) => (
-                  <SelectItem key={state} value={state}>
-                    {state}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              id="state"
+              placeholder="Enter state"
+              value={formData.state}
+              onChange={(e) => handleInputChange('state', e.target.value)}
+              required
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="lg">Local Government Area *</Label>
-            <Select value={formData.lg} onValueChange={(value) => handleInputChange('lg', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select LGA" />
-              </SelectTrigger>
-              <SelectContent>
-                {lgOptions.map((lg) => (
-                  <SelectItem key={lg} value={lg}>
-                    {lg}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              id="lg"
+              placeholder="Enter LGA"
+              value={formData.lg}
+              onChange={(e) => handleInputChange('lg', e.target.value)}
+              required
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="lcda">Local Council Development Area *</Label>
-            <Select value={formData.lcda} onValueChange={(value) => handleInputChange('lcda', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select LCDA" />
-              </SelectTrigger>
-              <SelectContent>
-                {lcdaOptions.map((lcda) => (
-                  <SelectItem key={lcda} value={lcda}>
-                    {lcda}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              id="lcda"
+              placeholder="Enter LCDA"
+              value={formData.lcda}
+              onChange={(e) => handleInputChange('lcda', e.target.value)}
+              required
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="cda">Community Development Association *</Label>
-            <Select value={formData.cda} onValueChange={(value) => handleInputChange('cda', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select CDA" />
-              </SelectTrigger>
-              <SelectContent>
-                {cdaOptions.map((cda) => (
-                  <SelectItem key={cda} value={cda}>
-                    {cda}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              id="cda"
+              placeholder="Enter CDA"
+              value={formData.cda}
+              onChange={(e) => handleInputChange('cda', e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-4">
+            <Label className="text-base font-medium">Property Count</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="houses">Houses</Label>
+                <Input
+                  id="houses"
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  value={formData.houses}
+                  onChange={(e) => handleInputChange('houses', parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="shops">Shops</Label>
+                <Input
+                  id="shops"
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  value={formData.shops}
+                  onChange={(e) => handleInputChange('shops', parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="hotels">Hotels</Label>
+                <Input
+                  id="hotels"
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  value={formData.hotels}
+                  onChange={(e) => handleInputChange('hotels', parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="others">Others</Label>
+                <Input
+                  id="others"
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  value={formData.others}
+                  onChange={(e) => handleInputChange('others', parseInt(e.target.value) || 0)}
+                />
+              </div>
+            </div>
+            <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+              Total Properties: <span className="font-semibold text-foreground">{totalProperties}</span>
+            </div>
           </div>
 
           <div className="space-y-2">

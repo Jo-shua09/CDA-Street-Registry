@@ -46,6 +46,12 @@ const mockStreetData = {
     lcda: "Victoria Island LCDA",
     registrationDate: "2023-03-15",
     description: "Main commercial avenue with mixed residential and commercial properties. This street serves as a major thoroughfare connecting various residential estates to the central business district.",
+    propertyCount: {
+      houses: 25,
+      shops: 15,
+      hotels: 3,
+      others: 2
+    },
     properties: [
       {
         id: 1,

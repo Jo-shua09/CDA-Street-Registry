@@ -23,6 +23,12 @@ interface StreetOverviewProps {
     registrationDate: string;
     description: string;
     properties: Array<{ type: string }>;
+    propertyCount?: {
+      houses: number;
+      shops: number;
+      hotels: number;
+      others: number;
+    };
   };
 }
 
@@ -35,8 +41,17 @@ export const StreetOverview = ({ street }: StreetOverviewProps) => {
     });
   };
 
-  // Calculate property type statistics
-  const propertyStats = street.properties.reduce((acc, property) => {
+  // Calculate property type statistics and total
+  const totalProperties = street.propertyCount ? 
+    street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others :
+    street.properties.length;
+
+  const propertyStats = street.propertyCount ? {
+    'Houses': street.propertyCount.houses,
+    'Shops': street.propertyCount.shops,
+    'Hotels': street.propertyCount.hotels,
+    'Others': street.propertyCount.others,
+  } : street.properties.reduce((acc, property) => {
     acc[property.type] = (acc[property.type] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
@@ -108,7 +123,7 @@ export const StreetOverview = ({ street }: StreetOverviewProps) => {
                   <h4 className="text-sm font-medium text-muted-foreground mb-1">Total Properties</h4>
                   <div className="flex items-center gap-2 text-foreground">
                     <Home className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-semibold">{street.properties.length}</span>
+                    <span className="font-semibold">{totalProperties}</span>
                     <span className="text-muted-foreground">registered</span>
                   </div>
                 </div>
@@ -137,7 +152,7 @@ export const StreetOverview = ({ street }: StreetOverviewProps) => {
                   .sort(([,a], [,b]) => b - a)
                   .map(([type, count]) => {
                     const Icon = getPropertyIcon(type);
-                    const percentage = (count / street.properties.length) * 100;
+                    const percentage = totalProperties > 0 ? (count / totalProperties) * 100 : 0;
                     
                     return (
                       <div key={type} className="space-y-2">

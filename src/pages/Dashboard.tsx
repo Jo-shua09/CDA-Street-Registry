@@ -27,7 +27,12 @@ const mockStreets = [
     state: "Lagos State",
     lg: "Lagos Island LGA",
     lcda: "Victoria Island LCDA",
-    propertyCount: 45,
+    propertyCount: {
+      houses: 25,
+      shops: 15,
+      hotels: 3,
+      others: 2
+    },
     registrationDate: "2023-03-15",
     description: "Main commercial avenue with mixed residential and commercial properties"
   },
@@ -38,7 +43,12 @@ const mockStreets = [
     state: "Lagos State",
     lg: "Lagos Island LGA", 
     lcda: "Victoria Island LCDA",
-    propertyCount: 28,
+    propertyCount: {
+      houses: 20,
+      shops: 5,
+      hotels: 2,
+      others: 1
+    },
     registrationDate: "2023-02-20",
     description: "Residential close with luxury properties"
   },
@@ -49,7 +59,12 @@ const mockStreets = [
     state: "Lagos State",
     lg: "Ikeja LGA",
     lcda: "Ikeja LCDA",
-    propertyCount: 67,
+    propertyCount: {
+      houses: 35,
+      shops: 25,
+      hotels: 4,
+      others: 3
+    },
     registrationDate: "2023-01-10",
     description: "Major road with commercial complexes and residential estates"
   },
@@ -60,7 +75,12 @@ const mockStreets = [
     state: "Lagos State",
     lg: "Ikeja LGA",
     lcda: "Allen Avenue LCDA",
-    propertyCount: 52,
+    propertyCount: {
+      houses: 20,
+      shops: 30,
+      hotels: 1,
+      others: 1
+    },
     registrationDate: "2023-04-05",
     description: "Busy commercial street with offices and shops"
   },
@@ -71,7 +91,12 @@ const mockStreets = [
     state: "Lagos State",
     lg: "Lagos Island LGA",
     lcda: "Ikoyi/Obalende LCDA",
-    propertyCount: 15,
+    propertyCount: {
+      houses: 12,
+      shops: 2,
+      hotels: 1,
+      others: 0
+    },
     registrationDate: "2023-05-12",
     description: "Exclusive residential area with premium properties"
   }
@@ -98,8 +123,11 @@ const Dashboard = () => {
     const matchesCDA = selectedFilters.cda.length === 0 || 
                        selectedFilters.cda.includes(street.cda);
     
-    const matchesPropertyCount = street.propertyCount >= selectedFilters.propertyRange.min &&
-                                street.propertyCount <= selectedFilters.propertyRange.max;
+    const totalProperties = street.propertyCount.houses + street.propertyCount.shops + 
+                       street.propertyCount.hotels + street.propertyCount.others;
+    
+    const matchesPropertyCount = totalProperties >= selectedFilters.propertyRange.min &&
+                                totalProperties <= selectedFilters.propertyRange.max;
     
     return matchesSearch && matchesCDA && matchesPropertyCount;
   });
@@ -187,7 +215,11 @@ const Dashboard = () => {
                   <div>
                     <p className="text-sm text-muted-foreground">Total Properties</p>
                     <p className="text-2xl font-bold text-foreground">
-                      {mockStreets.reduce((sum, street) => sum + street.propertyCount, 0)}
+                      {mockStreets.reduce((sum, street) => {
+                        const total = street.propertyCount.houses + street.propertyCount.shops + 
+                                     street.propertyCount.hotels + street.propertyCount.others;
+                        return sum + total;
+                      }, 0)}
                     </p>
                   </div>
                 </div>

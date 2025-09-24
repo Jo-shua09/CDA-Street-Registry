@@ -15,7 +15,16 @@ interface FilterPanelProps {
     dateRange: { start: string; end: string };
   };
   onFiltersChange: (filters: any) => void;
-  streets: Array<{ cda: string; propertyCount: number; registrationDate: string }>;
+  streets: Array<{ 
+    cda: string; 
+    propertyCount: {
+      houses: number;
+      shops: number;
+      hotels: number;
+      others: number;
+    }; 
+    registrationDate: string;
+  }>;
 }
 
 export const FilterPanel = ({ filters, onFiltersChange, streets }: FilterPanelProps) => {

@@ -25,7 +25,12 @@ interface StreetCardProps {
     state: string;
     lg: string;
     lcda: string;
-    propertyCount: number;
+    propertyCount: {
+      houses: number;
+      shops: number;
+      hotels: number;
+      others: number;
+    };
     registrationDate: string;
     description: string;
   };
@@ -85,7 +90,10 @@ export const StreetCard = ({ street }: StreetCardProps) => {
             <div className="flex flex-wrap gap-4 text-sm">
               <div className="flex items-center gap-1 text-muted-foreground">
                 <Home className="h-4 w-4" />
-                <span className="font-medium text-foreground">{street.propertyCount}</span>
+                <span className="font-medium text-foreground">
+                  {street.propertyCount.houses + street.propertyCount.shops + 
+                   street.propertyCount.hotels + street.propertyCount.others}
+                </span>
                 <span>properties</span>
               </div>
               <div className="flex items-center gap-1 text-muted-foreground">

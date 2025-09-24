@@ -23,7 +23,10 @@ const mockStreets = [
   {
     id: 1,
     name: "Ahmadu Bello Avenue",
-    cda: "Phase 1 CDA", 
+    cda: "Phase 1 CDA",
+    state: "Lagos State",
+    lg: "Lagos Island LGA",
+    lcda: "Victoria Island LCDA",
     propertyCount: 45,
     registrationDate: "2023-03-15",
     description: "Main commercial avenue with mixed residential and commercial properties"
@@ -32,6 +35,9 @@ const mockStreets = [
     id: 2,
     name: "Victoria Island Close",
     cda: "Victoria CDA",
+    state: "Lagos State",
+    lg: "Lagos Island LGA", 
+    lcda: "Victoria Island LCDA",
     propertyCount: 28,
     registrationDate: "2023-02-20",
     description: "Residential close with luxury properties"
@@ -40,6 +46,9 @@ const mockStreets = [
     id: 3,
     name: "Opebi Road",
     cda: "Ikeja CDA",
+    state: "Lagos State",
+    lg: "Ikeja LGA",
+    lcda: "Ikeja LCDA",
     propertyCount: 67,
     registrationDate: "2023-01-10",
     description: "Major road with commercial complexes and residential estates"
@@ -47,7 +56,10 @@ const mockStreets = [
   {
     id: 4,
     name: "Allen Avenue",
-    cda: "Ikeja CDA", 
+    cda: "Ikeja CDA",
+    state: "Lagos State",
+    lg: "Ikeja LGA",
+    lcda: "Allen Avenue LCDA",
     propertyCount: 52,
     registrationDate: "2023-04-05",
     description: "Busy commercial street with offices and shops"
@@ -56,6 +68,9 @@ const mockStreets = [
     id: 5,
     name: "Banana Island Circuit",
     cda: "Ikoyi CDA",
+    state: "Lagos State",
+    lg: "Lagos Island LGA",
+    lcda: "Ikoyi/Obalende LCDA",
     propertyCount: 15,
     registrationDate: "2023-05-12",
     description: "Exclusive residential area with premium properties"

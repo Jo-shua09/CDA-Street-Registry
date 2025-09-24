@@ -17,6 +17,9 @@ interface StreetOverviewProps {
     id: number;
     name: string;
     cda: string;
+    state: string;
+    lg: string;
+    lcda: string;
     registrationDate: string;
     description: string;
     properties: Array<{ type: string }>;
@@ -64,8 +67,17 @@ export const StreetOverview = ({ street }: StreetOverviewProps) => {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-foreground">{street.name}</h2>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="outline" className="flex items-center gap-1">
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <Badge variant="outline" className="text-xs">
+                      {street.state}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {street.lg}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {street.lcda}
+                    </Badge>
+                    <Badge variant="outline" className="flex items-center gap-1 text-xs">
                       <Users className="h-3 w-3" />
                       {street.cda}
                     </Badge>

@@ -22,6 +22,9 @@ interface StreetCardProps {
     id: number;
     name: string;
     cda: string;
+    state: string;
+    lg: string;
+    lcda: string;
     propertyCount: number;
     registrationDate: string;
     description: string;
@@ -57,7 +60,16 @@ export const StreetCard = ({ street }: StreetCardProps) => {
                 <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
                   {street.name}
                 </h3>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <Badge variant="outline" className="text-xs">
+                    {street.state}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {street.lg}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {street.lcda}
+                  </Badge>
                   <Badge variant="outline" className="text-xs">
                     {street.cda}
                   </Badge>

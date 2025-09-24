@@ -24,6 +24,9 @@ interface Street {
   id: number;
   name: string;
   cda: string;
+  state: string;
+  lg: string;
+  lcda: string;
   registrationDate: string;
   description: string;
 }
@@ -43,10 +46,46 @@ const cdaOptions = [
   "Gbagada CDA"
 ];
 
+const stateOptions = [
+  "Lagos State",
+  "Abuja FCT",
+  "Rivers State",
+  "Ogun State",
+  "Kano State",
+  "Kaduna State"
+];
+
+const lgOptions = [
+  "Lagos Island LGA",
+  "Lagos Mainland LGA", 
+  "Surulere LGA",
+  "Ikeja LGA",
+  "Alimosho LGA",
+  "Ikorodu LGA",
+  "Kosofe LGA",
+  "Mushin LGA",
+  "Oshodi-Isolo LGA",
+  "Shomolu LGA"
+];
+
+const lcdaOptions = [
+  "Ikoyi/Obalende LCDA",
+  "Lagos Island East LCDA",
+  "Victoria Island LCDA",
+  "Lekki LCDA",
+  "Ikeja LCDA",
+  "Allen Avenue LCDA",
+  "Agege LCDA",
+  "Surulere LCDA"
+];
+
 export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProps) => {
   const [formData, setFormData] = useState({
     name: street.name,
     cda: street.cda,
+    state: street.state,
+    lg: street.lg,
+    lcda: street.lcda,
     description: street.description,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,7 +98,7 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.cda) {
+    if (!formData.name || !formData.cda || !formData.state || !formData.lg || !formData.lcda) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields",
@@ -118,6 +157,54 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
               onChange={(e) => handleInputChange('name', e.target.value)}
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="state">State *</Label>
+            <Select value={formData.state} onValueChange={(value) => handleInputChange('state', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select State" />
+              </SelectTrigger>
+              <SelectContent>
+                {stateOptions.map((state) => (
+                  <SelectItem key={state} value={state}>
+                    {state}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="lg">Local Government Area *</Label>
+            <Select value={formData.lg} onValueChange={(value) => handleInputChange('lg', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select LGA" />
+              </SelectTrigger>
+              <SelectContent>
+                {lgOptions.map((lg) => (
+                  <SelectItem key={lg} value={lg}>
+                    {lg}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="lcda">Local Council Development Area *</Label>
+            <Select value={formData.lcda} onValueChange={(value) => handleInputChange('lcda', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select LCDA" />
+              </SelectTrigger>
+              <SelectContent>
+                {lcdaOptions.map((lcda) => (
+                  <SelectItem key={lcda} value={lcda}>
+                    {lcda}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

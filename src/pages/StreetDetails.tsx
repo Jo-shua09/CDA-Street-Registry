@@ -41,6 +41,9 @@ const mockStreetData = {
     id: 1,
     name: "Ahmadu Bello Avenue",
     cda: "Phase 1 CDA",
+    state: "Lagos State",
+    lg: "Lagos Island LGA",
+    lcda: "Victoria Island LCDA",
     registrationDate: "2023-03-15",
     description: "Main commercial avenue with mixed residential and commercial properties. This street serves as a major thoroughfare connecting various residential estates to the central business district.",
     properties: [

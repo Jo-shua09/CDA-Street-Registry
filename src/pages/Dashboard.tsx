@@ -44,38 +44,6 @@ const mockStreets = [
     registrationDate: "2023-03-15",
     description: "Main commercial avenue with mixed residential and commercial properties",
   },
-  {
-    id: 2,
-    name: "Marina Street",
-    cda: "Phase 1 CDA",
-    state: "Lagos State",
-    lg: "Lagos Island LGA",
-    lcda: "Victoria Island LCDA",
-    propertyCount: {
-      houses: 2,
-      shops: 0,
-      hotels: 1,
-      others: 0,
-    },
-    registrationDate: "2023-03-16",
-    description: "Residential street with some commercial properties",
-  },
-  {
-    id: 3,
-    name: "Adeola Odeku Street",
-    cda: "Phase 2 CDA",
-    state: "Lagos State",
-    lg: "Lagos Island LGA",
-    lcda: "Victoria Island LCDA",
-    propertyCount: {
-      houses: 1,
-      shops: 3,
-      hotels: 0,
-      others: 1,
-    },
-    registrationDate: "2023-03-17",
-    description: "Commercial street with offices and shops",
-  },
 ];
 
 const Dashboard = () => {

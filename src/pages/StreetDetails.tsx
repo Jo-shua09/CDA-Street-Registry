@@ -34,10 +34,10 @@ const mockStreetData = {
     description:
       "Main commercial avenue with mixed residential and commercial properties. This street serves as a major thoroughfare connecting various residential estates to the central business district.",
     propertyCount: {
-      houses: 25,
-      shops: 15,
-      hotels: 3,
-      others: 2,
+      houses: 1,
+      shops: 1,
+      hotels: 1,
+      others: 1,
     },
     properties: [
       {

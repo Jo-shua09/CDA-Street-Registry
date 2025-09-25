@@ -325,9 +325,7 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2">
-              <div className="bg-primary p-3 rounded-lg">
-                <MapPin className="h-5 w-5 text-primary-foreground" />
-              </div>
+              <img src="/logo.png" alt="CDA Registry Logo" className="h-10 w-10 object-contain" />
               <div>
                 <h1 className="text-lg font-semibold text-foreground">Street Registry</h1>
                 <p className="text-sm text-muted-foreground">Street & Property Management</p>

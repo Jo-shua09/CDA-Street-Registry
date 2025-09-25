@@ -44,9 +44,7 @@ const Login = () => {
         {/* Header */}
         <div className="text-center mb-4">
           <div className="flex items-center justify-center mb-4">
-            <div className="bg-primary p-2 rounded-2xl">
-              <Shield className="h-8 w-8 text-primary-foreground" />
-            </div>
+            <img src="/logo.png" alt="CDA Registry Logo" className="h-16 w-16 object-contain" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">Street Registry Admin</h1>
           <p className="text-muted-foreground">Secure access to street and property management</p>

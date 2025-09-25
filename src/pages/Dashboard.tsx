@@ -10,6 +10,7 @@ import { CdaCard } from "@/components/dashboard/CdaCard";
 import { StreetForm } from "@/components/street/StreetForm";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import logo from "/logo.png";
 
 interface StreetFormData {
   name: string;
@@ -325,7 +326,7 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2">
-              <img src="/logo.png" alt="CDA Registry Logo" className="h-10 w-10 object-contain" />
+              <img src={logo} alt="CDA Registry Logo" className="h-10 w-10 object-contain" />
               <div>
                 <h1 className="text-lg font-semibold text-foreground">Street Registry</h1>
                 <p className="text-sm text-muted-foreground">Street & Property Management</p>

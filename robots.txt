@@ -23,7 +23,7 @@ Crawl-delay: 2
 # Disallow: /private/
 
 # Sitemap location
-Sitemap: https://cda-registry.com/sitemap.xml
+Sitemap: https://iblcda-cda-registry.vercel.app/sitemap.xml
 
 # Additional directives
 # Block access to development files

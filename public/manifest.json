@@ -2,7 +2,7 @@
   "name": "CDA Street & Property Registry",
   "short_name": "CDA Registry",
   "description": "Professional admin interface for managing Community Development Association street and property registrations",
-  "start_url": "/",
+  "start_url": "https://iblcda-cda-registry.vercel.app/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1f2937",

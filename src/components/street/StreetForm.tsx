@@ -31,8 +31,13 @@ interface StreetFormData {
   lg: string;
   lcda: string;
   description: string;
+  houses: number;
+  shops: number;
   hotels: number;
   others: number;
+  hasShops: boolean;
+  shopCount: number;
+  shopDetails: ShopDetail[];
 }
 
 interface StreetFormProps {
@@ -151,19 +156,25 @@ export const StreetForm = ({ onClose, onSubmit }: StreetFormProps) => {
             </div>
 
             <div className="space-y-2 w-full">
-              <Label htmlFor="lg">Local Government Area *</Label>
+              <Label className="leading-tight" htmlFor="lg">
+                Local Government Area *
+              </Label>
               <Input id="lg" placeholder="Enter LGA" value={formData.lg} onChange={(e) => handleInputChange("lg", e.target.value)} required />
             </div>
           </div>
 
           <div className="flex items-center gap-4 w-full">
             <div className="space-y-2 w-full">
-              <Label htmlFor="lcda">Local Council Development Area *</Label>
+              <Label className="leading-tight" htmlFor="lcda">
+                Local Council Development Area *
+              </Label>
               <Input id="lcda" placeholder="Enter LCDA" value={formData.lcda} onChange={(e) => handleInputChange("lcda", e.target.value)} required />
             </div>
 
             <div className="space-y-2 w-full">
-              <Label htmlFor="cda">Community Development Association *</Label>
+              <Label className="leading-tight" htmlFor="cda">
+                Community Development Association *
+              </Label>
               <Input id="cda" placeholder="Enter CDA" value={formData.cda} onChange={(e) => handleInputChange("cda", e.target.value)} required />
             </div>
           </div>
@@ -180,10 +191,6 @@ export const StreetForm = ({ onClose, onSubmit }: StreetFormProps) => {
                   </Badge>
                 </div>
 
-                <div className="text-sm text-muted-foreground mb-3">
-                  Since you've registered {formData.houses} house(s), you can add shops that are part of these houses.
-                </div>
-
                 <div className="space-y-3">
                   <div>
                     <Label className="text-sm font-medium">Does this house have any shops?</Label>
@@ -195,13 +202,13 @@ export const StreetForm = ({ onClose, onSubmit }: StreetFormProps) => {
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="yes" id="shops-yes" />
                         <Label htmlFor="shops-yes" className="text-sm font-normal">
-                          Yes, this house has shops
+                          Yes
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="no" id="shops-no" />
                         <Label htmlFor="shops-no" className="text-sm font-normal">
-                          No shops in this house
+                          No
                         </Label>
                       </div>
                     </RadioGroup>

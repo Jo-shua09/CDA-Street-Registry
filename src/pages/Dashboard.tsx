@@ -400,12 +400,12 @@ const Dashboard = () => {
           {/* Search Bar */}
           <div className="flex items-center w-full space-x-4">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2  -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search CDAs or streets..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-12 w-full text-lg"
+                className="pl-10 h-12 w-full text-lg placeholder:text-sm"
               />
             </div>
 

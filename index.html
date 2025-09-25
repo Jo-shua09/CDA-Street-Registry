@@ -1,25 +1,157 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CDA Street & Property Registry - Admin Panel</title>
-    <meta name="description" content="Professional admin interface for managing Community Development Association street and property registrations" />
-    <meta name="author" content="CDA Registry System" />
-    <meta name="keywords" content="CDA, street registry, property management, admin panel, community development" />
 
-    <meta property="og:title" content="CDA Street & Property Registry - Admin Panel" />
-    <meta property="og:description" content="Secure admin interface for CDA street and property management system" />
+    <!-- Primary Meta Tags -->
+    <title>CDA Street & Property Registry - Professional Admin Dashboard</title>
+    <meta name="title" content="CDA Street & Property Registry - Professional Admin Dashboard" />
+    <meta
+      name="description"
+      content="Comprehensive web application for managing Community Development Association street and property registrations. Features advanced search, filtering, pagination, and professional reporting tools."
+    />
+    <meta
+      name="keywords"
+      content="CDA, Community Development Association, Street Registry, Property Management, Admin Dashboard, Real Estate, Nigeria, Lagos, Property Registration, Street Management"
+    />
+    <meta name="author" content="CDA Management Team" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://cda-registry.com" />
+
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:url" content="https://cda-registry.com" />
+    <meta property="og:title" content="CDA Street & Property Registry - Professional Admin Dashboard" />
+    <meta
+      property="og:description"
+      content="Comprehensive web application for managing Community Development Association street and property registrations. Features advanced search, filtering, pagination, and professional reporting tools."
+    />
+    <meta property="og:image" content="https://cda-registry.com/og-image.png" />
+    <meta property="og:site_name" content="CDA Registry" />
+    <meta property="og:locale" content="en_NG" />
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://cda-registry.com" />
+    <meta property="twitter:title" content="CDA Street & Property Registry - Professional Admin Dashboard" />
+    <meta
+      property="twitter:description"
+      content="Comprehensive web application for managing Community Development Association street and property registrations. Features advanced search, filtering, pagination, and professional reporting tools."
+    />
+    <meta property="twitter:image" content="https://cda-registry.com/twitter-image.png" />
+
+    <!-- Favicon and Icons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()" />
+
+    <!-- Content Security Policy -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval';
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com;
+      img-src 'self' data: https:;
+      connect-src 'self' https://api.cda-registry.com wss://api.cda-registry.com;
+      frame-ancestors 'none';
+      base-uri 'self';
+      form-action 'self';
+    "
+    />
+
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="/src/main.tsx" as="script" />
+    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#1f2937" />
+    <meta name="msapplication-TileColor" content="#1f2937" />
+
+    <!-- Additional SEO -->
+    <meta name="application-name" content="CDA Registry" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="CDA Registry" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "CDA Street & Property Registry",
+        "description": "Professional admin interface for managing Community Development Association street and property registrations",
+        "url": "https://cda-registry.com",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+          "@type": "Offer",
+          "category": "Property Management Software"
+        },
+        "featureList": [
+          "Street Registration",
+          "Property Management",
+          "CDA Administration",
+          "Advanced Search & Filtering",
+          "Report Generation",
+          "Data Analytics"
+        ],
+        "author": {
+          "@type": "Organization",
+          "name": "CDA Management Team"
+        }
+      }
+    </script>
   </head>
 
   <body>
-    <div id="root"></div>
+    <!-- Skip to main content for accessibility -->
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50"
+    >
+      Skip to main content
+    </a>
+
+    <!-- Main application -->
+    <div id="root" role="application" aria-label="CDA Street & Property Registry Dashboard"></div>
+
+    <!-- Security: Hide application from search engines if needed -->
+    <noscript>
+      <div style="text-align: center; padding: 20px; font-family: Arial, sans-serif">
+        <h1>JavaScript Required</h1>
+        <p>This application requires JavaScript to function properly. Please enable JavaScript in your browser settings and reload the page.</p>
+      </div>
+    </noscript>
+
+    <!-- Main entry point -->
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Fallback for users with JavaScript disabled -->
+    <script>
+      // Basic error handling and security checks
+      window.addEventListener("error", function (e) {
+        console.error("Application Error:", e.error);
+        // In production, you might want to send this to an error reporting service
+      });
+
+      // Basic security check
+      if (window.location.protocol !== "https:" && window.location.hostname !== "localhost") {
+        console.warn("Warning: This site should be accessed over HTTPS in production");
+      }
+    </script>
   </body>
 </html>

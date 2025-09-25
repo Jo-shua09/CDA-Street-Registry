@@ -1,21 +1,9 @@
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { 
-  MapPin, 
-  Home, 
-  Calendar, 
-  Edit, 
-  MoreHorizontal,
-  Eye
-} from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { MapPin, Home, Calendar, Edit, MoreHorizontal, Eye } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface StreetCardProps {
   street: {
@@ -40,10 +28,10 @@ export const StreetCard = ({ street }: StreetCardProps) => {
   const navigate = useNavigate();
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -58,13 +46,12 @@ export const StreetCard = ({ street }: StreetCardProps) => {
           {/* Main Content */}
           <div className="flex-1 min-w-0" onClick={handleViewStreet}>
             <div className="flex items-start gap-3 mb-3">
-              <div className="bg-primary-light p-2 rounded-lg mt-1">
-                <MapPin className="h-4 w-4 text-primary" />
+              <div className="bg-primary-light p-3 rounded-lg mt-1">
+                <MapPin className="h-6 w-6 text-primary" />
               </div>
+
               <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-                  {street.name}
-                </h3>
+                <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">{street.name}</h3>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <Badge variant="outline" className="text-xs">
                     {street.state}
@@ -82,22 +69,19 @@ export const StreetCard = ({ street }: StreetCardProps) => {
               </div>
             </div>
 
-            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-              {street.description}
-            </p>
+            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{street.description}</p>
 
             {/* Stats */}
             <div className="flex flex-wrap gap-4 text-sm">
               <div className="flex items-center gap-1 text-muted-foreground">
-                <Home className="h-4 w-4" />
-                <span className="font-medium text-foreground">
-                  {street.propertyCount.houses + street.propertyCount.shops + 
-                   street.propertyCount.hotels + street.propertyCount.others}
+                <Home className="h-5 w-5" />
+                <span className="font-semibold text-foreground">
+                  {street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others}
                 </span>
                 <span>properties</span>
               </div>
               <div className="flex items-center gap-1 text-muted-foreground">
-                <Calendar className="h-4 w-4" />
+                <Calendar className="h-5 w-5" />
                 <span>Registered {formatDate(street.registrationDate)}</span>
               </div>
             </div>
@@ -105,22 +89,13 @@ export const StreetCard = ({ street }: StreetCardProps) => {
 
           {/* Actions */}
           <div className="flex items-center gap-2 self-start sm:self-center">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleViewStreet}
-              className="hidden sm:flex"
-            >
-              <Eye className="h-4 w-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={handleViewStreet} className="hidden sm:flex">
+              <Eye className="h-5 w-5 mr-2" />
               View Details
             </Button>
 
-            <Button
-              size="sm"
-              onClick={handleViewStreet}
-              className="sm:hidden w-full"
-            >
-              <Eye className="h-4 w-4 mr-2" />
+            <Button size="sm" onClick={handleViewStreet} className="sm:hidden w-full">
+              <Eye className="h-5 w-5 mr-2" />
               View Details
             </Button>
 

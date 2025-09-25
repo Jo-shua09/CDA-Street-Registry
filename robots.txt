@@ -1,0 +1,59 @@
+# Robots.txt for CDA Street & Property Registry
+# Allow all web crawlers access to all content
+
+User-agent: *
+Allow: /
+
+# Specific rules for different crawlers
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 2
+
+# Disallow access to sensitive areas (if any)
+# Disallow: /admin/
+# Disallow: /api/
+# Disallow: /private/
+
+# Sitemap location
+Sitemap: https://cda-registry.com/sitemap.xml
+
+# Additional directives
+# Block access to development files
+Disallow: /src/
+Disallow: /node_modules/
+Disallow: /*.log$
+Disallow: /*.tmp$
+
+# Allow access to CSS, JS, and image files
+Allow: /assets/
+Allow: /images/
+Allow: /css/
+Allow: /js/
+Allow: /favicon.ico
+Allow: /*.css$
+Allow: /*.js$
+
+# Prevent indexing of duplicate content
+Noindex: /dev/
+Noindex: /test/
+Noindex: /staging/
+
+# Mobile crawling
+User-agent: Googlebot-Mobile
+Allow: /
+Crawl-delay: 2
+
+User-agent: Googlebot-Image
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.png$
+Allow: /*.gif$
+Allow: /*.svg$

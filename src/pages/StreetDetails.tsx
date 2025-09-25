@@ -1,29 +1,15 @@
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import {
-  ArrowLeft,
-  MapPin,
-  Home,
-  Calendar,
-  Edit,
-  Trash2,
-  Plus,
-  Search,
-  MoreHorizontal,
-  Eye,
-  Building,
-  Store,
-  Hotel
-} from 'lucide-react';
-import { PropertyForm } from '@/components/properties/PropertyForm';
-import { PropertyTable } from '@/components/properties/PropertyTable';
-import { PropertyDetails } from '@/components/properties/PropertyDetails';
-import { StreetOverview } from '@/components/street/StreetOverview';
-import { StreetEditForm } from '@/components/street/StreetEditForm';
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, MapPin, Home, Calendar, Edit, Trash2, Plus, Search, MoreHorizontal, Eye, Building, Store, Hotel } from "lucide-react";
+import { PropertyForm } from "@/components/properties/PropertyForm";
+import { PropertyTable } from "@/components/properties/PropertyTable";
+import { PropertyDetails } from "@/components/properties/PropertyDetails";
+import { StreetOverview } from "@/components/street/StreetOverview";
+import { StreetEditForm } from "@/components/street/StreetEditForm";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,7 +19,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 
 // Mock data
 const mockStreetData = {
@@ -45,12 +31,13 @@ const mockStreetData = {
     lg: "Lagos Island LGA",
     lcda: "Victoria Island LCDA",
     registrationDate: "2023-03-15",
-    description: "Main commercial avenue with mixed residential and commercial properties. This street serves as a major thoroughfare connecting various residential estates to the central business district.",
+    description:
+      "Main commercial avenue with mixed residential and commercial properties. This street serves as a major thoroughfare connecting various residential estates to the central business district.",
     propertyCount: {
       houses: 25,
       shops: 15,
       hotels: 3,
-      others: 2
+      others: 2,
     },
     properties: [
       {
@@ -60,46 +47,10 @@ const mockStreetData = {
         owner: "John Adebayo",
         contact: "+234 803 123 4567",
         description: "3-bedroom duplex with modern amenities",
-        registrationDate: "2023-03-20"
+        registrationDate: "2023-03-20",
       },
-      {
-        id: 2,
-        number: "17",
-        type: "Shop",
-        owner: "Fatima's Electronics",
-        contact: "+234 805 987 6543",
-        description: "Electronics retail store with repair services",
-        registrationDate: "2023-04-01"
-      },
-      {
-        id: 3,
-        number: "19B",
-        type: "House",
-        owner: "Dr. Sarah Okonkwo",
-        contact: "+234 807 555 1234",
-        description: "4-bedroom family home with garden",
-        registrationDate: "2023-03-25"
-      },
-      {
-        id: 4,
-        number: "21",
-        type: "Hotel",
-        owner: "Grandview Hotels Ltd",
-        contact: "+234 809 876 5432",
-        description: "Boutique hotel with 24 rooms",
-        registrationDate: "2023-05-10"
-      },
-      {
-        id: 5,
-        number: "23",
-        type: "Shop",
-        owner: "Mama Ngozi's Store",
-        contact: "+234 806 111 2233",
-        description: "General provisions and household items",
-        registrationDate: "2023-04-15"
-      }
-    ]
-  }
+    ],
+  },
 };
 
 const StreetDetails = () => {
@@ -110,9 +61,9 @@ const StreetDetails = () => {
   const [viewingProperty, setViewingProperty] = useState<any>(null);
   const [showStreetEditForm, setShowStreetEditForm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const streetId = parseInt(id || '1');
+  const streetId = parseInt(id || "1");
   const street = mockStreetData[streetId as keyof typeof mockStreetData];
 
   if (!street) {
@@ -121,13 +72,9 @@ const StreetDetails = () => {
         <Card>
           <CardContent className="p-8 text-center">
             <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-foreground mb-2">
-              Street not found
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              The requested street could not be found.
-            </p>
-            <Button onClick={() => navigate('/dashboard')}>
+            <h3 className="text-lg font-medium text-foreground mb-2">Street not found</h3>
+            <p className="text-muted-foreground mb-4">The requested street could not be found.</p>
+            <Button onClick={() => navigate("/dashboard")}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
             </Button>
@@ -139,9 +86,9 @@ const StreetDetails = () => {
 
   const handlePropertySubmit = (propertyData: any) => {
     if (editingProperty) {
-      console.log('Updating property:', propertyData);
+      console.log("Updating property:", propertyData);
     } else {
-      console.log('Adding new property:', propertyData);
+      console.log("Adding new property:", propertyData);
     }
     setShowPropertyForm(false);
     setEditingProperty(null);
@@ -157,7 +104,7 @@ const StreetDetails = () => {
   };
 
   const handleDeleteProperty = (propertyId: number) => {
-    console.log('Deleting property:', propertyId);
+    console.log("Deleting property:", propertyId);
     // Here you would typically make an API call to delete the property
     // For now, we'll just show a success message
   };
@@ -167,7 +114,7 @@ const StreetDetails = () => {
   };
 
   const handleStreetSubmit = (streetData: any) => {
-    console.log('Updating street:', streetData);
+    console.log("Updating street:", streetData);
     // Here you would typically make an API call to update the street
   };
 
@@ -176,17 +123,18 @@ const StreetDetails = () => {
   };
 
   const confirmDeleteStreet = () => {
-    console.log('Deleting street:', street.id);
+    console.log("Deleting street:", street.id);
     // Here you would typically make an API call to delete the street
     // Then navigate back to dashboard
     setShowDeleteConfirm(false);
-    navigate('/dashboard');
+    navigate("/dashboard");
   };
 
-  const filteredProperties = street.properties.filter(property =>
-    property.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    property.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    property.owner.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProperties = street.properties.filter(
+    (property) =>
+      property.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      property.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      property.owner.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -196,40 +144,23 @@ const StreetDetails = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/dashboard')}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
-              </Button>
-              <div className="h-6 border-l border-border"></div>
               <div className="flex items-center space-x-3">
-                <div className="bg-primary p-2 rounded-lg">
-                  <MapPin className="h-4 w-4 text-primary-foreground" />
+                <div className="bg-primary p-3 rounded-lg">
+                  <MapPin className="h-6 w-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <h1 className="text-lg font-semibold text-foreground">
-                    {street.name}
-                  </h1>
+                  <h1 className="text-lg font-semibold text-foreground">{street.name}</h1>
                   <p className="text-sm text-muted-foreground">{street.cda}</p>
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm" onClick={handleEditStreet}>
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Street
               </Button>
-              <Button 
-                variant="destructive" 
-                size="sm"
-                className="hidden sm:flex"
-                onClick={handleDeleteStreet}
-              >
+              <Button variant="destructive" size="sm" className="hidden sm:flex" onClick={handleDeleteStreet}>
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete Street
               </Button>
@@ -239,8 +170,15 @@ const StreetDetails = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="w-fit mb-6">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </div>
+
         {/* Street Overview */}
-        <StreetOverview street={street} />
+        <StreetOverview street={street} handleEditStreet={handleEditStreet} />
 
         {/* Properties Section */}
         <div className="mt-8">
@@ -252,15 +190,12 @@ const StreetDetails = () => {
                     <Home className="h-5 w-5" />
                     Properties on this Street
                   </CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Manage all properties registered on {street.name}
+                  <p className="text-sm text-muted-foreground">
+                    Manage all properties registered on <span className="font-bold">{street.name}</span>
                   </p>
                 </div>
-                <Button 
-                  onClick={() => setShowPropertyForm(true)}
-                  className="bg-primary hover:bg-primary-hover"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button onClick={() => setShowPropertyForm(true)} className="bg-primary hover:bg-primary-hover">
+                  <Plus className="h-5 w-5 mr-2" />
                   Register New Property
                 </Button>
               </div>
@@ -278,7 +213,7 @@ const StreetDetails = () => {
                     className="pl-10"
                   />
                 </div>
-                <div className="flex gap-2 text-sm text-muted-foreground">
+                <div className="flex gap-2 text-sm  text-muted-foreground">
                   <Badge variant="outline">
                     {filteredProperties.length} of {street.properties.length} properties
                   </Badge>
@@ -322,13 +257,7 @@ const StreetDetails = () => {
       )}
 
       {/* Street Edit Form Modal */}
-      {showStreetEditForm && (
-        <StreetEditForm
-          street={street}
-          onClose={() => setShowStreetEditForm(false)}
-          onSubmit={handleStreetSubmit}
-        />
-      )}
+      {showStreetEditForm && <StreetEditForm street={street} onClose={() => setShowStreetEditForm(false)} onSubmit={handleStreetSubmit} />}
 
       {/* Delete Street Confirmation */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
@@ -336,15 +265,13 @@ const StreetDetails = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Street</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{street.name}"? This action cannot be undone and will permanently remove the street and all associated properties from the system.
+              Are you sure you want to delete "{street.name}"? This action cannot be undone and will permanently remove the street and all associated
+              properties from the system.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDeleteStreet}
-              className="bg-destructive hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={confirmDeleteStreet} className="bg-destructive hover:bg-destructive/90">
               Delete Street
             </AlertDialogAction>
           </AlertDialogFooter>

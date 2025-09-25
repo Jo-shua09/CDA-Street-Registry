@@ -1,17 +1,10 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface Street {
   id: number;
@@ -56,12 +49,12 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
   const totalProperties = formData.houses + formData.shops + formData.hotels + formData.others;
 
   const handleInputChange = (field: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.cda || !formData.state || !formData.lg || !formData.lcda) {
       toast({
         title: "Missing Information",
@@ -72,11 +65,11 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
     }
 
     setIsSubmitting(true);
-    
+
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       const updatedStreet = {
         ...street,
         name: formData.name,
@@ -94,12 +87,12 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
       };
 
       onSubmit(updatedStreet);
-      
+
       toast({
         title: "Street Updated",
         description: `${formData.name} has been updated successfully.`,
       });
-      
+
       onClose();
     } catch (error) {
       toast({
@@ -114,12 +107,10 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-3xl overflow-y-scroll h-full">
         <DialogHeader>
           <DialogTitle className="text-xl">Edit Street Details</DialogTitle>
-          <DialogDescription>
-            Update the information for {street.name}
-          </DialogDescription>
+          <DialogDescription>Update the information for {street.name}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -129,58 +120,44 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
               id="name"
               placeholder="Enter street name"
               value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
+              onChange={(e) => handleInputChange("name", e.target.value)}
               required
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="state">State *</Label>
-            <Input
-              id="state"
-              placeholder="Enter state"
-              value={formData.state}
-              onChange={(e) => handleInputChange('state', e.target.value)}
-              required
-            />
+          <div className="flex items-center w-full gap-4">
+            <div className="space-y-2 w-full">
+              <Label htmlFor="state">State *</Label>
+              <Input
+                id="state"
+                placeholder="Enter state"
+                value={formData.state}
+                onChange={(e) => handleInputChange("state", e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2 w-full">
+              <Label htmlFor="lg">Local Government Area *</Label>
+              <Input id="lg" placeholder="Enter LGA" value={formData.lg} onChange={(e) => handleInputChange("lg", e.target.value)} required />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="lg">Local Government Area *</Label>
-            <Input
-              id="lg"
-              placeholder="Enter LGA"
-              value={formData.lg}
-              onChange={(e) => handleInputChange('lg', e.target.value)}
-              required
-            />
-          </div>
+          <div className="flex items-center gap-4 w-full">
+            <div className="space-y-2 w-full">
+              <Label htmlFor="lcda">Local Council Development Area *</Label>
+              <Input id="lcda" placeholder="Enter LCDA" value={formData.lcda} onChange={(e) => handleInputChange("lcda", e.target.value)} required />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="lcda">Local Council Development Area *</Label>
-            <Input
-              id="lcda"
-              placeholder="Enter LCDA"
-              value={formData.lcda}
-              onChange={(e) => handleInputChange('lcda', e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="cda">Community Development Association *</Label>
-            <Input
-              id="cda"
-              placeholder="Enter CDA"
-              value={formData.cda}
-              onChange={(e) => handleInputChange('cda', e.target.value)}
-              required
-            />
+            <div className="space-y-2 w-full">
+              <Label htmlFor="cda">Community Development Association *</Label>
+              <Input id="cda" placeholder="Enter CDA" value={formData.cda} onChange={(e) => handleInputChange("cda", e.target.value)} required />
+            </div>
           </div>
 
           <div className="space-y-4">
             <Label className="text-base font-medium">Property Count</Label>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="houses">Houses</Label>
                 <Input
@@ -189,7 +166,7 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
                   min="0"
                   placeholder="0"
                   value={formData.houses}
-                  onChange={(e) => handleInputChange('houses', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleInputChange("houses", parseInt(e.target.value) || 0)}
                 />
               </div>
               <div className="space-y-2">
@@ -200,7 +177,7 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
                   min="0"
                   placeholder="0"
                   value={formData.shops}
-                  onChange={(e) => handleInputChange('shops', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleInputChange("shops", parseInt(e.target.value) || 0)}
                 />
               </div>
               <div className="space-y-2">
@@ -211,7 +188,7 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
                   min="0"
                   placeholder="0"
                   value={formData.hotels}
-                  onChange={(e) => handleInputChange('hotels', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleInputChange("hotels", parseInt(e.target.value) || 0)}
                 />
               </div>
               <div className="space-y-2">
@@ -222,7 +199,7 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
                   min="0"
                   placeholder="0"
                   value={formData.others}
-                  onChange={(e) => handleInputChange('others', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleInputChange("others", parseInt(e.target.value) || 0)}
                 />
               </div>
             </div>
@@ -238,7 +215,7 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
               placeholder="Brief description of the street"
               rows={4}
               value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
+              onChange={(e) => handleInputChange("description", e.target.value)}
             />
           </div>
 
@@ -247,7 +224,7 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Updating...' : 'Update Street'}
+              {isSubmitting ? "Updating..." : "Update Street"}
             </Button>
           </DialogFooter>
         </form>

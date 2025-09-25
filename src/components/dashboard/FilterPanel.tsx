@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { Slider } from '@/components/ui/slider';
-import { Calendar, X, RotateCcw } from 'lucide-react';
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
+import { Calendar, X, RotateCcw } from "lucide-react";
 
 interface FilterPanelProps {
   filters: {
@@ -15,35 +15,30 @@ interface FilterPanelProps {
     dateRange: { start: string; end: string };
   };
   onFiltersChange: (filters: any) => void;
-  streets: Array<{ 
-    cda: string; 
+  streets: Array<{
+    cda: string;
     propertyCount: {
       houses: number;
       shops: number;
       hotels: number;
       others: number;
-    }; 
+    };
     registrationDate: string;
   }>;
 }
 
 export const FilterPanel = ({ filters, onFiltersChange, streets }: FilterPanelProps) => {
-  const [tempPropertyRange, setTempPropertyRange] = useState([
-    filters.propertyRange.min,
-    filters.propertyRange.max
-  ]);
+  const [tempPropertyRange, setTempPropertyRange] = useState([filters.propertyRange.min, filters.propertyRange.max]);
 
   // Get unique CDAs from streets
-  const uniqueCDAs = Array.from(new Set(streets.map(street => street.cda))).sort();
+  const uniqueCDAs = Array.from(new Set(streets.map((street) => street.cda))).sort();
 
   const handleCDAChange = (cda: string, checked: boolean) => {
-    const newCDAs = checked
-      ? [...filters.cda, cda]
-      : filters.cda.filter(c => c !== cda);
-    
+    const newCDAs = checked ? [...filters.cda, cda] : filters.cda.filter((c) => c !== cda);
+
     onFiltersChange({
       ...filters,
-      cda: newCDAs
+      cda: newCDAs,
     });
   };
 
@@ -51,17 +46,17 @@ export const FilterPanel = ({ filters, onFiltersChange, streets }: FilterPanelPr
     setTempPropertyRange(values);
     onFiltersChange({
       ...filters,
-      propertyRange: { min: values[0], max: values[1] }
+      propertyRange: { min: values[0], max: values[1] },
     });
   };
 
-  const handleDateRangeChange = (field: 'start' | 'end', value: string) => {
+  const handleDateRangeChange = (field: "start" | "end", value: string) => {
     onFiltersChange({
       ...filters,
       dateRange: {
         ...filters.dateRange,
-        [field]: value
-      }
+        [field]: value,
+      },
     });
   };
 
@@ -69,13 +64,14 @@ export const FilterPanel = ({ filters, onFiltersChange, streets }: FilterPanelPr
     const resetFilters = {
       cda: [],
       propertyRange: { min: 0, max: 100 },
-      dateRange: { start: '', end: '' }
+      dateRange: { start: "", end: "" },
     };
     setTempPropertyRange([0, 100]);
     onFiltersChange(resetFilters);
   };
 
-  const activeFiltersCount = filters.cda.length + 
+  const activeFiltersCount =
+    filters.cda.length +
     (filters.dateRange.start || filters.dateRange.end ? 1 : 0) +
     (filters.propertyRange.min !== 0 || filters.propertyRange.max !== 100 ? 1 : 0);
 
@@ -92,12 +88,7 @@ export const FilterPanel = ({ filters, onFiltersChange, streets }: FilterPanelPr
             )}
           </CardTitle>
           {activeFiltersCount > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearAllFilters}
-              className="text-muted-foreground hover:text-foreground"
-            >
+            <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-muted-foreground hover:text-foreground">
               <RotateCcw className="h-4 w-4 mr-1" />
               Clear
             </Button>
@@ -108,25 +99,16 @@ export const FilterPanel = ({ filters, onFiltersChange, streets }: FilterPanelPr
       <CardContent className="space-y-6">
         {/* CDA Filter */}
         <div>
-          <Label className="text-sm font-medium mb-3 block">
-            Community Development Association
-          </Label>
+          <Label className="text-sm font-medium mb-3 block">Community Development Association</Label>
           <div className="space-y-2 max-h-40 overflow-y-auto">
             {uniqueCDAs.map((cda) => (
               <div key={cda} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`cda-${cda}`}
-                  checked={filters.cda.includes(cda)}
-                  onCheckedChange={(checked) => handleCDAChange(cda, !!checked)}
-                />
-                <Label
-                  htmlFor={`cda-${cda}`}
-                  className="text-sm text-foreground cursor-pointer flex-1"
-                >
+                <Checkbox id={`cda-${cda}`} checked={filters.cda.includes(cda)} onCheckedChange={(checked) => handleCDAChange(cda, !!checked)} />
+                <Label htmlFor={`cda-${cda}`} className="text-sm text-foreground cursor-pointer flex-1">
                   {cda}
                 </Label>
                 <Badge variant="outline" className="text-xs">
-                  {streets.filter(s => s.cda === cda).length}
+                  {streets.filter((s) => s.cda === cda).length}
                 </Badge>
               </div>
             ))}
@@ -135,18 +117,9 @@ export const FilterPanel = ({ filters, onFiltersChange, streets }: FilterPanelPr
 
         {/* Property Count Range */}
         <div>
-          <Label className="text-sm font-medium mb-3 block">
-            Number of Properties
-          </Label>
+          <Label className="text-sm font-medium mb-3 block">Number of Properties</Label>
           <div className="px-2">
-            <Slider
-              value={tempPropertyRange}
-              onValueChange={handlePropertyRangeChange}
-              max={100}
-              min={0}
-              step={5}
-              className="w-full"
-            />
+            <Slider value={tempPropertyRange} onValueChange={handlePropertyRangeChange} max={100} min={0} step={5} className="w-full" />
             <div className="flex justify-between mt-2 text-sm text-muted-foreground">
               <span>Min: {tempPropertyRange[0]}</span>
               <span>Max: {tempPropertyRange[1]}</span>
@@ -169,7 +142,7 @@ export const FilterPanel = ({ filters, onFiltersChange, streets }: FilterPanelPr
                 id="start-date"
                 type="date"
                 value={filters.dateRange.start}
-                onChange={(e) => handleDateRangeChange('start', e.target.value)}
+                onChange={(e) => handleDateRangeChange("start", e.target.value)}
                 className="mt-1"
               />
             </div>
@@ -181,7 +154,7 @@ export const FilterPanel = ({ filters, onFiltersChange, streets }: FilterPanelPr
                 id="end-date"
                 type="date"
                 value={filters.dateRange.end}
-                onChange={(e) => handleDateRangeChange('end', e.target.value)}
+                onChange={(e) => handleDateRangeChange("end", e.target.value)}
                 className="mt-1"
               />
             </div>
@@ -194,16 +167,9 @@ export const FilterPanel = ({ filters, onFiltersChange, streets }: FilterPanelPr
             <Label className="text-sm font-medium mb-2 block">Active Filters</Label>
             <div className="flex flex-wrap gap-1">
               {filters.cda.map((cda) => (
-                <Badge
-                  key={cda}
-                  variant="secondary"
-                  className="text-xs flex items-center gap-1"
-                >
+                <Badge key={cda} variant="secondary" className="text-xs flex items-center gap-1">
                   {cda}
-                  <button
-                    onClick={() => handleCDAChange(cda, false)}
-                    className="hover:text-foreground"
-                  >
+                  <button onClick={() => handleCDAChange(cda, false)} className="hover:text-foreground">
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>

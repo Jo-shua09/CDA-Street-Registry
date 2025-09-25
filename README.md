@@ -1,73 +1,281 @@
-# Welcome to your Lovable project
+# CDA Street & Property Registry
 
-## Project info
+A comprehensive web application for managing Community Development Association (CDA) street and property registrations. Built with modern web technologies for efficient property management and community administration.
 
-**URL**: https://lovable.dev/projects/165f181a-208a-424c-9bf4-3f57f9c696a7
+## 🌟 Features
 
-## How can I edit this code?
+### Core Functionality
 
-There are several ways of editing your application.
+- **CDA Management**: Organize and manage multiple Community Development Associations
+- **Street Registration**: Register and track streets within each CDA
+- **Property Tracking**: Monitor residential, commercial, and mixed-use properties
+- **Advanced Search & Filtering**: Find specific CDAs and streets quickly
+- **Pagination**: Efficient handling of large datasets
+- **Print Reports**: Generate printable reports for CDAs and registered streets
 
-**Use Lovable**
+### User Interface
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/165f181a-208a-424c-9bf4-3f57f9c696a7) and start prompting.
+- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
+- **Modern UI**: Clean, professional interface using shadcn/ui components
+- **Dark/Light Theme Support**: User-friendly theme switching
+- **Intuitive Navigation**: Easy-to-use dashboard with clear information hierarchy
 
-Changes made via Lovable will be committed automatically to this repo.
+### Technical Features
 
-**Use your preferred IDE**
+- **Real-time Updates**: Live data synchronization
+- **Form Validation**: Comprehensive input validation and error handling
+- **Data Export**: Export functionality for reports and data analysis
+- **Security**: Built-in security measures and best practices
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🚀 Quick Start
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prerequisites
 
-Follow these steps:
+- Node.js (v18 or higher)
+- npm or yarn package manager
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Installation
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+1. **Clone the repository**
 
-# Step 3: Install the necessary dependencies.
-npm i
+   ```bash
+   git clone <repository-url>
+   cd cda-dwell-admin
+   ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server**
+
+   ```bash
+   npm run dev
+   ```
+
+4. **Open your browser**
+   Navigate to `http://localhost:5173` to view the application
+
+### Build for Production
+
+```bash
+# Create production build
+npm run build
+
+# Preview production build
+npm run preview
 ```
 
-**Edit a file directly in GitHub**
+## 🛠 Technology Stack
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Frontend
 
-**Use GitHub Codespaces**
+- **React 18** - Modern React with hooks and concurrent features
+- **TypeScript** - Type-safe development
+- **Vite** - Fast build tool and development server
+- **Tailwind CSS** - Utility-first CSS framework
+- **shadcn/ui** - High-quality, accessible component library
+- **React Router** - Client-side routing
+- **React Hook Form** - Performant forms with easy validation
+- **Zod** - TypeScript-first schema validation
+- **Lucide React** - Beautiful icon library
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Development Tools
 
-## What technologies are used for this project?
+- **ESLint** - Code linting and formatting
+- **TypeScript** - Static type checking
+- **Vite** - Fast development and building
 
-This project is built with:
+## 📁 Project Structure
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```
+src/
+├── components/           # Reusable UI components
+│   ├── dashboard/       # Dashboard-specific components
+│   ├── properties/      # Property management components
+│   ├── street/         # Street management components
+│   └── ui/             # Base UI components (shadcn/ui)
+├── pages/              # Application pages/routes
+│   ├── Dashboard.tsx   # Main dashboard page
+│   ├── Login.tsx       # Authentication page
+│   └── StreetDetails.tsx # Street details page
+├── hooks/              # Custom React hooks
+├── lib/                # Utility functions and configurations
+├── types/              # TypeScript type definitions
+└── utils/              # Helper functions
+```
 
-## How can I deploy this project?
+## 🔧 Configuration
 
-Simply open [Lovable](https://lovable.dev/projects/165f181a-208a-424c-9bf4-3f57f9c696a7) and click on Share -> Publish.
+### Environment Variables
 
-## Can I connect a custom domain to my Lovable project?
+Create a `.env` file in the root directory:
 
-Yes, you can!
+```env
+VITE_API_BASE_URL=your-api-endpoint
+VITE_APP_TITLE=CDA Street & Property Registry
+VITE_ENABLE_ANALYTICS=false
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Customization
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- **Theme**: Modify `tailwind.config.ts` for custom styling
+- **Components**: Customize components in `src/components/ui/`
+- **Routes**: Add new routes in `src/App.tsx`
+
+## 🔒 Security Features
+
+### Built-in Security
+
+- **Content Security Policy (CSP)**: Prevents XSS attacks
+- **HTTPS Enforcement**: Secure communication
+- **Input Validation**: Client and server-side validation
+- **XSS Protection**: Built-in React XSS protection
+- **CSRF Protection**: Token-based request validation
+- **Secure Headers**: Security headers implementation
+
+### Best Practices
+
+- Environment variable protection
+- Secure API communication
+- Data sanitization
+- Error handling without information leakage
+
+## 🎨 Customization
+
+### Adding New Components
+
+1. Create component in appropriate directory
+2. Export from index file if needed
+3. Add to component library
+
+### Styling
+
+- Use Tailwind CSS classes for styling
+- Follow the design system established
+- Maintain consistency with existing components
+
+### Adding New Pages
+
+1. Create page component in `src/pages/`
+2. Add route in `src/App.tsx`
+3. Update navigation if needed
+
+## 📊 Performance
+
+### Optimization Features
+
+- **Code Splitting**: Automatic route-based code splitting
+- **Lazy Loading**: Components loaded on demand
+- **Tree Shaking**: Unused code elimination
+- **Image Optimization**: Automatic image optimization
+- **Caching**: Intelligent caching strategies
+
+### Performance Monitoring
+
+- Built-in performance monitoring
+- Error tracking and reporting
+- User experience metrics
+
+## 🧪 Testing
+
+### Running Tests
+
+```bash
+# Run unit tests
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+### Testing Strategy
+
+- Unit tests for components and utilities
+- Integration tests for critical user flows
+- End-to-end tests for complete workflows
+
+## 🚀 Deployment
+
+### Production Deployment
+
+1. Build the application: `npm run build`
+2. Deploy the `dist` folder to your hosting provider
+3. Configure environment variables
+4. Set up monitoring and analytics
+
+### Supported Platforms
+
+- Vercel (recommended)
+- Netlify
+- GitHub Pages
+- AWS S3 + CloudFront
+- Any static hosting provider
+
+### Environment Configuration
+
+- Production: `VITE_NODE_ENV=production`
+- Development: `VITE_NODE_ENV=development`
+- Staging: `VITE_NODE_ENV=staging`
+
+## 🤝 Contributing
+
+### Development Setup
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+### Code Standards
+
+- Follow TypeScript best practices
+- Use ESLint configuration
+- Write meaningful commit messages
+- Add documentation for new features
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+### Getting Help
+
+- Check the documentation
+- Review existing issues
+- Create a new issue for bugs or feature requests
+- Contact the development team
+
+### Common Issues
+
+- **Build Errors**: Clear node_modules and reinstall
+- **TypeScript Errors**: Check TypeScript configuration
+- **Styling Issues**: Verify Tailwind CSS setup
+
+## 🔄 Updates and Maintenance
+
+### Regular Updates
+
+- Keep dependencies updated
+- Monitor security vulnerabilities
+- Update documentation as needed
+- Review and optimize performance
+
+### Backup Strategy
+
+- Regular database backups
+- Code repository backups
+- Configuration backups
+
+---
+
+**Built with ❤️ for Community Development Associations**
+
+For more information, visit our [documentation](#) or [contact us](#).

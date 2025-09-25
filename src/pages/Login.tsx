@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, Eye, EyeOff } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Shield, Eye, EyeOff } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -24,9 +24,9 @@ const Login = () => {
       if (email && password) {
         toast({
           title: "Login Successful",
-          description: "Welcome to the CDA Registry Admin Panel",
+          description: "Welcome to the Street Registry Admin Panel",
         });
-        navigate('/dashboard');
+        navigate("/dashboard");
       } else {
         toast({
           title: "Login Failed",
@@ -42,29 +42,25 @@ const Login = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-4">
           <div className="flex items-center justify-center mb-4">
-            <div className="bg-primary p-3 rounded-2xl">
+            <div className="bg-primary p-2 rounded-2xl">
               <Shield className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">CDA Registry Admin</h1>
-          <p className="text-muted-foreground mt-2">
-            Secure access to street and property management
-          </p>
+          <h1 className="text-2xl font-bold text-foreground">Street Registry Admin</h1>
+          <p className="text-muted-foreground">Secure access to street and property management</p>
         </div>
 
         {/* Login Card */}
         <Card className="shadow-lg border-0 bg-card">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-xl text-center">Admin Login</CardTitle>
-            <CardDescription className="text-center">
-              Enter your credentials to access the admin panel
-            </CardDescription>
+            <CardDescription className="text-center">Enter your credentials to access the admin panel</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div className="space-y-1">
                 <Label htmlFor="email">Email Address</Label>
                 <Input
                   id="email"
@@ -76,8 +72,8 @@ const Login = () => {
                   className="h-11"
                 />
               </div>
-              
-              <div className="space-y-2">
+
+              <div className="space-y-1">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Input
@@ -94,37 +90,25 @@ const Login = () => {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full h-11 font-medium"
-                disabled={isLoading}
-              >
+              <Button type="submit" className="w-full h-11 font-medium" disabled={isLoading}>
                 {isLoading ? "Signing In..." : "Sign In"}
               </Button>
             </form>
 
-            <div className="mt-6 pt-6 border-t border-border">
-              <p className="text-xs text-muted-foreground text-center">
-                Secure admin access only. Unauthorized access is prohibited.
-              </p>
+            <div className="mt-4 pt-3 border-t border-border">
+              <p className="text-xs text-muted-foreground text-center">Secure admin access only. Unauthorized access is prohibited.</p>
             </div>
           </CardContent>
         </Card>
 
         {/* Footer */}
         <div className="mt-8 text-center">
-          <p className="text-xs text-muted-foreground">
-            © 2024 CDA Street & Property Registry System
-          </p>
+          <p className="text-xs text-muted-foreground">© 2025 CDA Street & Property Registry System</p>
         </div>
       </div>
     </div>

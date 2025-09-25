@@ -40,8 +40,8 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-background border place-content-center flex m-auto items-center justify-center p-4">
+      <div className="w-full max-w-md m-auto justify-center">
         {/* Header */}
         <div className="text-center mb-4">
           <div className="flex items-center justify-center mb-4">
@@ -52,7 +52,7 @@ const Login = () => {
         </div>
 
         {/* Login Card */}
-        <Card className="shadow-lg border-0 bg-card">
+        <Card className="shadow-lg border bg-card">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-xl text-center">Admin Login</CardTitle>
             <CardDescription className="text-center">Enter your credentials to access the admin panel</CardDescription>

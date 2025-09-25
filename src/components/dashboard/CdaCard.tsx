@@ -53,24 +53,24 @@ export const CdaCard = ({ cda, streets, onStreetClick }: CdaCardProps) => {
     <Card className="hover:shadow-lg transition-all duration-200 border border-border">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <CardContent className="p-6 cursor-pointer">
-            <div className="flex items-center justify-between">
+          <CardContent className="p-4 sm:p-6 cursor-pointer">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="bg-primary-light p-3 rounded-lg">
-                  <Building className="h-6 w-6 text-primary" />
+                <div className="bg-primary-light p-2 sm:p-3 rounded-lg">
+                  <Building className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </div>
 
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">{cda}</h3>
-                  <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground truncate">{cda}</h3>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1 text-xs sm:text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
+                      <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
                       <span>
                         {totalStreets} street{totalStreets !== 1 ? "s" : ""}
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Home className="h-4 w-4" />
+                      <Home className="h-3 w-3 sm:h-4 sm:w-4" />
                       <span>
                         {totalProperties} propert{totalProperties !== 1 ? "ies" : "y"}
                       </span>
@@ -79,11 +79,15 @@ export const CdaCard = ({ cda, streets, onStreetClick }: CdaCardProps) => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">
+              <div className="flex items-center justify-between sm:justify-end gap-2">
+                <Badge variant="outline" className="text-xs hidden sm:inline-flex">
                   {totalStreets} Street{totalStreets !== 1 ? "s" : ""}
                 </Badge>
-                {isOpen ? <ChevronDown className="h-5 w-5 text-muted-foreground" /> : <ChevronRight className="h-5 w-5 text-muted-foreground" />}
+                {isOpen ? (
+                  <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                )}
               </div>
             </div>
           </CardContent>
@@ -96,32 +100,32 @@ export const CdaCard = ({ cda, streets, onStreetClick }: CdaCardProps) => {
                 {displayedStreets.map((street) => (
                   <div
                     key={street.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
                     onClick={() => onStreetClick(street.id)}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="bg-secondary p-2 rounded-md">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="bg-secondary p-2 rounded-md flex-shrink-0">
                         <MapPin className="h-4 w-4 text-secondary-foreground" />
                       </div>
 
-                      <div>
-                        <h4 className="font-medium text-foreground">{street.name}</h4>
-                        <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                          <span>{street.state}</span>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-medium text-foreground truncate">{street.name}</h4>
+                        <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-1 text-xs sm:text-sm text-muted-foreground">
+                          <span className="truncate">{street.state}</span>
                           <span>•</span>
-                          <span>{street.lg}</span>
+                          <span className="truncate">{street.lg}</span>
                           <span>•</span>
-                          <span>{street.lcda}</span>
+                          <span className="truncate">{street.lcda}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <div className="text-right text-sm">
+                    <div className="flex items-center justify-between sm:justify-end gap-3 flex-shrink-0">
+                      <div className="text-left sm:text-right text-sm">
                         <div className="font-medium text-foreground">
                           {street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others}
                         </div>
-                        <div className="text-muted-foreground">properties</div>
+                        <div className="text-muted-foreground text-xs sm:text-sm">properties</div>
                       </div>
 
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0">

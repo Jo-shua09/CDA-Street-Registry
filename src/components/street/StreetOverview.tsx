@@ -74,30 +74,31 @@ export const StreetOverview = ({ street, handleEditStreet }: StreetOverviewProps
                 <div className="bg-primary-light p-3 rounded-xl">
                   <MapPin className="h-6 w-6 text-primary" />
                 </div>
-                <div>
-                  <h2 className="text-2xl leading-6 font-bold text-foreground">{street.name}</h2>
-                  <div className="grid grid-cols-2 max-w-fit md:grid-cols-2 lg:grid-cols-3 items-end gap-y-1 gap-x-2 mt-1">
-                    <Badge variant="outline" className="text-xs text-nowrap w-fit">
-                      {street.state}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs text-nowrap w-fit">
-                      {street.lg}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs text-nowrap w-fit">
-                      {street.lcda}
-                    </Badge>
-                    <Badge variant="outline" className="flex items-center gap-1 md:ml-0 ml-6 text-xs text-nowrap w-fit">
-                      <Users className="h-3 w-3" />
-                      {street.cda}
-                    </Badge>
-                  </div>
-                </div>
+                <h2 className="text-xl leading-5 sm:text-2xl font-bold text-foreground">{street.name}</h2>
               </div>
 
               <Button variant="outline" size="sm" onClick={handleEditStreet}>
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Details
               </Button>
+            </div>
+
+            <div className="my-5">
+              <div className="grid grid-cols-2 max-w-fit sm:grid-cols-2 lg:grid-cols-3 items-end gap-y-1 gap-x-2 mt-1">
+                <Badge variant="outline" className="text-xs text-nowrap w-fit">
+                  {street.state}
+                </Badge>
+                <Badge variant="outline" className="text-xs text-nowrap w-fit">
+                  {street.lg}
+                </Badge>
+                <Badge variant="outline" className="text-xs text-nowrap w-fit">
+                  {street.lcda}
+                </Badge>
+                <Badge variant="outline" className="flex items-center gap-1 text-xs text-nowrap w-fit">
+                  <Users className="h-3 w-3" />
+                  {street.cda}
+                </Badge>
+              </div>
             </div>
 
             <div className="space-y-4">

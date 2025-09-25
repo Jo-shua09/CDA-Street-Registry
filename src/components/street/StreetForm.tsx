@@ -10,6 +10,14 @@ import { Badge } from "@/components/ui/badge";
 import { Store } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+interface HouseDetail {
+  number: string;
+  type: string;
+  description: string;
+  hasShops: boolean;
+  shops: ShopDetail[];
+}
+
 interface ShopDetail {
   number: string;
   type: string;
@@ -23,13 +31,8 @@ interface StreetFormData {
   lg: string;
   lcda: string;
   description: string;
-  houses: number;
-  shops: number;
   hotels: number;
   others: number;
-  hasShops: boolean;
-  shopCount: number;
-  shopDetails: ShopDetail[];
 }
 
 interface StreetFormProps {

@@ -356,13 +356,22 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
 
             {/* Upload Area */}
             <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
-              <input type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt" onChange={handleFileUpload} className="hidden" id="file-upload" />
+              <input
+                type="file"
+                multiple
+                accept="image/*,.pdf,.doc,.docx,.txt"
+                onChange={handleFileUpload}
+                className="hidden"
+                id="file-upload"
+              />
               <label htmlFor="file-upload" className="cursor-pointer">
                 <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                 <p className="text-sm text-foreground">
                   <span className="font-medium text-primary">Click to upload</span> or drag and drop
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">Images (JPG, PNG, GIF), PDFs, and documents (Max 10MB each)</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Images (JPG, PNG, GIF), PDFs, and documents (Max 10MB each)
+                </p>
               </label>
             </div>
 
@@ -374,10 +383,10 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
                     All Files ({files.length})
                   </TabsTrigger>
                   <TabsTrigger value="images" className="text-xs">
-                    Images ({files.filter((f) => f.type.startsWith("image/")).length})
+                    Images ({files.filter(f => f.type.startsWith('image/')).length})
                   </TabsTrigger>
                   <TabsTrigger value="documents" className="text-xs">
-                    Documents ({files.filter((f) => !f.type.startsWith("image/")).length})
+                    Documents ({files.filter(f => !f.type.startsWith('image/')).length})
                   </TabsTrigger>
                 </TabsList>
 
@@ -393,7 +402,7 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          {file.type.startsWith("image/") && (
+                          {file.type.startsWith('image/') && (
                             <Button
                               type="button"
                               variant="ghost"
@@ -425,62 +434,58 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
 
                 <TabsContent value="images" className="mt-4">
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-48 overflow-y-auto">
-                    {files
-                      .filter((f) => f.type.startsWith("image/"))
-                      .map((file, index) => (
-                        <div key={index} className="relative group">
-                          <div className="aspect-square bg-muted rounded-lg border overflow-hidden">
-                            <img
-                              src={URL.createObjectURL(file)}
-                              alt={file.name}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.currentTarget.style.display = "none";
-                                e.currentTarget.nextElementSibling?.classList.remove("hidden");
-                              }}
-                            />
-                            <div className="hidden absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground text-xs">
-                              Preview unavailable
-                            </div>
+                    {files.filter(f => f.type.startsWith('image/')).map((file, index) => (
+                      <div key={index} className="relative group">
+                        <div className="aspect-square bg-muted rounded-lg border overflow-hidden">
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={file.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                          <div className="hidden absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground text-xs">
+                            Preview unavailable
                           </div>
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => removeFile(files.indexOf(file))}
-                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
                         </div>
-                      ))}
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => removeFile(files.indexOf(file))}
+                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
                   </div>
                 </TabsContent>
 
                 <TabsContent value="documents" className="mt-4">
                   <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {files
-                      .filter((f) => !f.type.startsWith("image/"))
-                      .map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            {getFileIcon(file)}
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-foreground truncate">{file.name}</p>
-                              <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
-                            </div>
+                    {files.filter(f => !f.type.startsWith('image/')).map((file, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          {getFileIcon(file)}
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-foreground truncate">{file.name}</p>
+                            <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
                           </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeFile(files.indexOf(file))}
-                            className="text-muted-foreground hover:text-destructive"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
                         </div>
-                      ))}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFile(files.indexOf(file))}
+                          className="text-muted-foreground hover:text-destructive"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
                   </div>
                 </TabsContent>
               </Tabs>

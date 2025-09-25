@@ -145,24 +145,22 @@ const StreetDetails = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-3">
-                <div className="bg-primary p-3 rounded-lg">
-                  <MapPin className="h-6 w-6 text-primary-foreground" />
+                <div className="bg-primary p-2 sm:p-3 rounded-lg">
+                  <MapPin className="sm:h-6 h-5 w-5 sm:w-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <h1 className="text-lg font-semibold text-foreground">{street.name}</h1>
-                  <p className="text-sm text-muted-foreground">{street.cda}</p>
+                  <h1 className="text-sm sm:text-lg font-semibold text-foreground">{street.name}</h1>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{street.cda}</p>
                 </div>
               </div>
             </div>
 
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm" onClick={handleEditStreet}>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Street
+                <Edit className="h-4 w-4" />
               </Button>
-              <Button variant="destructive" size="sm" className="hidden sm:flex" onClick={handleDeleteStreet}>
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete Street
+              <Button variant="destructive" size="sm" className="flex" onClick={handleDeleteStreet}>
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           </div>

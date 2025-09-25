@@ -324,21 +324,21 @@ const Dashboard = () => {
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-2">
+          <div className="flex flex-row items-center justify-between pt-6 h-16 py-4 sm:py-0">
+            <div className="flex items-center space-x-2 mb-4 sm:mb-0">
               <img src="./logo.png" alt="CDA Registry Logo" className="h-10 w-10 object-contain" />
               <div>
-                <h1 className="text-lg font-semibold text-foreground">Street Registry</h1>
-                <p className="text-sm text-muted-foreground">Street & Property Management</p>
+                <h1 className="text-sm sm:text-lg font-semibold text-foreground">Street Registry</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground">Street & Property Management</p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 flex-wrap">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="text-muted-foreground hover:text-foreground">
                     <Printer className="h-4 w-4 mr-2" />
-                    Print
+                    <span className="hidden sm:inline">Print</span>
                     <ChevronDown className="h-4 w-4 ml-2" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -355,8 +355,8 @@ const Dashboard = () => {
               </DropdownMenu>
 
               <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
+                <LogOut className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </div>
           </div>

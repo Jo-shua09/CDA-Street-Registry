@@ -231,11 +231,7 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {propertyImages.map((image) => (
-                      <Card
-                        key={image.id}
-                        className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-                        onClick={() => handleImageView(image.url)}
-                      >
+                      <Card key={image.id} className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleImageView(image.url)}>
                         <div className="aspect-square bg-muted relative">
                           <img
                             src={image.url}
@@ -324,7 +320,12 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
                     e.currentTarget.src = "/placeholder.svg";
                   }}
                 />
-                <Button variant="outline" size="sm" className="absolute top-2 right-2" onClick={() => setSelectedImage(null)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="absolute top-2 right-2"
+                  onClick={() => setSelectedImage(null)}
+                >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -340,8 +341,17 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
                 <DialogTitle>Document Viewer</DialogTitle>
               </DialogHeader>
               <div className="relative h-96">
-                <iframe src={selectedDocument} className="w-full h-full border rounded" title="Document Viewer" />
-                <Button variant="outline" size="sm" className="absolute top-2 right-2" onClick={() => setSelectedDocument(null)}>
+                <iframe
+                  src={selectedDocument}
+                  className="w-full h-full border rounded"
+                  title="Document Viewer"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="absolute top-2 right-2"
+                  onClick={() => setSelectedDocument(null)}
+                >
                   <X className="h-4 w-4" />
                 </Button>
               </div>

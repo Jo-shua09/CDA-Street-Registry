@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Home, Calendar, ChevronDown, ChevronRight, Users, Building } from "lucide-react";
+import { MapPin, Home, Calendar, ChevronDown, ChevronRight, Users, Building, Edit, Trash2 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface Street {
@@ -22,13 +22,26 @@ interface Street {
   description: string;
 }
 
-interface CdaCardProps {
-  cda: string;
-  streets: Street[];
-  onStreetClick: (streetId: number) => void;
+interface CdaData {
+  id: number;
+  name: string;
+  state: string;
+  lg: string;
+  description: string;
+  registrationDate: string;
 }
 
-export const CdaCard = ({ cda, streets, onStreetClick }: CdaCardProps) => {
+interface CdaCardProps {
+  cda: CdaData;
+  streets: Street[];
+  onStreetClick: (streetId: number) => void;
+  onEdit: (cda: CdaData) => void;
+  onDelete: (cdaId: number) => void;
+  onEditStreet: (street: Street) => void;
+  onDeleteStreet: (streetId: number) => void;
+}
+
+export const CdaCard = ({ cda, streets, onStreetClick, onEdit, onDelete, onEditStreet, onDeleteStreet }: CdaCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showAllStreets, setShowAllStreets] = useState(false);
 
@@ -61,7 +74,7 @@ export const CdaCard = ({ cda, streets, onStreetClick }: CdaCardProps) => {
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground truncate">{cda}</h3>
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground truncate">{cda.name}</h3>
                   <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1 text-xs sm:text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -80,6 +93,30 @@ export const CdaCard = ({ cda, streets, onStreetClick }: CdaCardProps) => {
               </div>
 
               <div className="flex items-center justify-between sm:justify-end gap-2">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(cda);
+                    }}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(cda.id);
+                    }}
+                    className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
                 <Badge variant="outline" className="text-xs hidden sm:inline-flex">
                   {totalStreets} Street{totalStreets !== 1 ? "s" : ""}
                 </Badge>
@@ -128,9 +165,33 @@ export const CdaCard = ({ cda, streets, onStreetClick }: CdaCardProps) => {
                         <div className="text-muted-foreground text-xs sm:text-sm">properties</div>
                       </div>
 
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEditStreet(street);
+                          }}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteStreet(street.id);
+                          }}
+                          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}

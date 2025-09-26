@@ -8,6 +8,9 @@ import { Search, Filter, MapPin, Home, X, Users, Plus, Menu, LogOut, Building, P
 import { FilterPanel } from "@/components/dashboard/FilterPanel";
 import { CdaCard } from "@/components/dashboard/CdaCard";
 import { StreetForm } from "@/components/street/StreetForm";
+import { CdaForm } from "@/components/dashboard/CdaForm";
+import { CdaEditForm } from "@/components/dashboard/CdaEditForm";
+import { StreetEditForm } from "@/components/street/StreetEditForm";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 // import logo from "/logo.png";
@@ -26,7 +29,45 @@ interface StreetFormData {
   registrationDate: string;
 }
 
+interface CdaData {
+  id: number;
+  name: string;
+  state: string;
+  lg: string;
+  description: string;
+  registrationDate: string;
+}
+
+interface Street {
+  id: number;
+  name: string;
+  cda: string;
+  state: string;
+  lg: string;
+  lcda: string;
+  registrationDate: string;
+  description: string;
+  properties: Array<{ type: string }>;
+  propertyCount: {
+    houses: number;
+    shops: number;
+    hotels: number;
+    others: number;
+  };
+}
+
 // Mock data
+const mockCDAs = [
+  {
+    id: 1,
+    name: "Phase 1 CDA",
+    state: "Lagos State",
+    lg: "Lagos Island LGA",
+    description: "First phase CDA",
+    registrationDate: "2023-01-01",
+  },
+];
+
 const mockStreets = [
   {
     id: 1,
@@ -43,6 +84,7 @@ const mockStreets = [
     },
     registrationDate: "2023-03-15",
     description: "Main commercial avenue with mixed residential and commercial properties",
+    properties: [{ type: "house" }, { type: "shop" }, { type: "hotel" }, { type: "other" }],
   },
 ];
 
@@ -50,6 +92,15 @@ const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [showStreetForm, setShowStreetForm] = useState(false);
+  const [showCdaForm, setShowCdaForm] = useState(false);
+  const [showCdaEditForm, setShowCdaEditForm] = useState(false);
+  const [showStreetEditForm, setShowStreetEditForm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [editingCda, setEditingCda] = useState<CdaData | null>(null);
+  const [editingStreet, setEditingStreet] = useState<Street | null>(null);
+  const [deletingCdaId, setDeletingCdaId] = useState<number | null>(null);
+  const [deletingStreetId, setDeletingStreetId] = useState<number | null>(null);
+  const [deletingType, setDeletingType] = useState<"cda" | "street" | null>(null);
   const [selectedFilters, setSelectedFilters] = useState({
     cda: [],
     propertyRange: { min: 0, max: 100 },
@@ -69,8 +120,15 @@ const Dashboard = () => {
   };
 
   const handleStreetSubmit = (streetData: StreetFormData & { registrationDate: string }) => {
+    // Create properties array based on counts
+    const properties: Array<{ type: string }> = [];
+    for (let i = 0; i < streetData.houses; i++) properties.push({ type: "house" });
+    for (let i = 0; i < streetData.shops; i++) properties.push({ type: "shop" });
+    for (let i = 0; i < streetData.hotels; i++) properties.push({ type: "hotel" });
+    for (let i = 0; i < streetData.others; i++) properties.push({ type: "other" });
+
     // Add the new street to mock data
-    const newStreet = {
+    const newStreet: Street = {
       id: mockStreets.length + 1,
       name: streetData.name,
       cda: streetData.cda,
@@ -85,15 +143,86 @@ const Dashboard = () => {
       },
       registrationDate: streetData.registrationDate,
       description: streetData.description,
+      properties,
     };
 
     // Update mock data (in a real app, this would be an API call)
     mockStreets.push(newStreet);
   };
 
+  const handleRegisterCda = () => {
+    setShowCdaForm(true);
+  };
+
+  const handleCdaSubmit = (cdaData: CdaData & { registrationDate: string }) => {
+    const newCda = {
+      id: mockCDAs.length + 1,
+      ...cdaData,
+    };
+    mockCDAs.push(newCda);
+  };
+
+  const handleEditCda = (cda: CdaData) => {
+    setEditingCda(cda);
+    setShowCdaEditForm(true);
+  };
+
+  const handleCdaEditSubmit = (updatedCda: CdaData) => {
+    const index = mockCDAs.findIndex((cda) => cda.id === updatedCda.id);
+    if (index !== -1) {
+      mockCDAs[index] = updatedCda;
+    }
+    setShowCdaEditForm(false);
+    setEditingCda(null);
+  };
+
+  const handleDeleteCda = (cdaId: number) => {
+    setDeletingType("cda");
+    setDeletingCdaId(cdaId);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    if (deletingType === "cda" && deletingCdaId !== null) {
+      const index = mockCDAs.findIndex((cda) => cda.id === deletingCdaId);
+      if (index !== -1) {
+        mockCDAs.splice(index, 1);
+      }
+    } else if (deletingType === "street" && deletingStreetId !== null) {
+      const index = mockStreets.findIndex((street) => street.id === deletingStreetId);
+      if (index !== -1) {
+        mockStreets.splice(index, 1);
+      }
+    }
+    setShowDeleteConfirm(false);
+    setDeletingCdaId(null);
+    setDeletingStreetId(null);
+    setDeletingType(null);
+  };
+
   const handleStreetClick = (streetId: number) => {
     // For now, just navigate to street details
     navigate(`/street/${streetId}`);
+  };
+
+  const handleEditStreet = (street: Street) => {
+    setEditingStreet(street);
+    setShowStreetEditForm(true);
+  };
+
+  const handleStreetEditSubmit = (updatedStreet: Street) => {
+    const index = mockStreets.findIndex((s) => s.id === updatedStreet.id);
+    if (index !== -1) {
+      mockStreets[index] = updatedStreet;
+    }
+    setShowStreetEditForm(false);
+    setEditingStreet(null);
+  };
+
+  const handleDeleteStreet = (streetId: number) => {
+    setDeletingType("street");
+    setDeletingStreetId(streetId);
+    setShowDeleteConfirm(true);
   };
 
   // Print functions
@@ -102,15 +231,15 @@ const Dashboard = () => {
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
 
-    const cdaData = Object.keys(groupedStreets).map((cda, index) => {
-      const streets = groupedStreets[cda];
+    const cdaData = mockCDAs.map((cda, index) => {
+      const streets = groupedStreets[cda.name] || [];
       const totalProperties = streets.reduce((sum, street) => {
         return sum + street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others;
       }, 0);
 
       return {
         number: index + 1,
-        name: cda,
+        name: cda.name,
         streetsCount: streets.length,
         propertiesCount: totalProperties,
       };
@@ -163,7 +292,7 @@ const Dashboard = () => {
           </table>
 
           <div class="footer">
-            <p>Total CDAs: ${Object.keys(groupedStreets).length}</p>
+            <p>Total CDAs: ${mockCDAs.length}</p>
           </div>
         </body>
       </html>
@@ -261,12 +390,13 @@ const Dashboard = () => {
     return acc;
   }, {} as Record<string, typeof mockStreets>);
 
-  const filteredCdas = Object.keys(groupedStreets).filter((cda) => {
-    const streets = groupedStreets[cda];
+  const filteredCdas = mockCDAs.filter((cda) => {
+    const streets = groupedStreets[cda.name] || [];
     const matchesSearch =
-      cda.toLowerCase().includes(searchTerm.toLowerCase()) || streets.some((street) => street.name.toLowerCase().includes(searchTerm.toLowerCase()));
+      cda.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      streets.some((street) => street.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesCDA = selectedFilters.cda.length === 0 || selectedFilters.cda.includes(cda);
+    const matchesCDA = selectedFilters.cda.length === 0 || selectedFilters.cda.includes(cda.name);
 
     const totalProperties = streets.reduce((sum, street) => {
       return sum + street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others;
@@ -340,10 +470,25 @@ const Dashboard = () => {
               <p className="text-muted-foreground">Manage and monitor all registered CDAs and their streets</p>
             </div>
 
-            <Button className="mt-4 sm:mt-0" onClick={handleRegisterStreet}>
-              <Plus className="h-4 w-4 mr-2" />
-              Register New Street
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="mt-4 sm:mt-0">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Register
+                  <ChevronDown className="h-4 w-4 ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleRegisterStreet}>
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Register New Street
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleRegisterCda}>
+                  <Building className="h-4 w-4 mr-2" />
+                  Register New CDA
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Stats Cards */}
@@ -356,7 +501,7 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total CDAs</p>
-                    <p className="text-2xl font-bold text-foreground">{Object.keys(groupedStreets).length}</p>
+                    <p className="text-2xl font-bold text-foreground">{mockCDAs.length}</p>
                   </div>
                 </div>
               </CardContent>
@@ -439,7 +584,7 @@ const Dashboard = () => {
           <div className="flex-1">
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-muted-foreground">
-                Showing {filteredCdas.length} of {Object.keys(groupedStreets).length} CDAs
+                Showing {filteredCdas.length} of {mockCDAs.length} CDAs
               </p>
               <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)} className="lg:hidden">
                 {!showFilters ? (
@@ -468,7 +613,16 @@ const Dashboard = () => {
               <>
                 <div className="space-y-4">
                   {paginatedCdas.map((cda) => (
-                    <CdaCard key={cda} cda={cda} streets={groupedStreets[cda]} onStreetClick={handleStreetClick} />
+                    <CdaCard
+                      key={cda.id}
+                      cda={cda}
+                      streets={groupedStreets[cda.name] || []}
+                      onStreetClick={handleStreetClick}
+                      onEdit={handleEditCda}
+                      onDelete={handleDeleteCda}
+                      onEditStreet={handleEditStreet}
+                      onDeleteStreet={handleDeleteStreet}
+                    />
                   ))}
                 </div>
 
@@ -510,6 +664,59 @@ const Dashboard = () => {
 
       {/* Street Form Modal */}
       {showStreetForm && <StreetForm onClose={() => setShowStreetForm(false)} onSubmit={handleStreetSubmit} />}
+
+      {/* CDA Form Modal */}
+      {showCdaForm && <CdaForm onClose={() => setShowCdaForm(false)} onSubmit={handleCdaSubmit} />}
+
+      {/* Street Edit Form Modal */}
+      {showStreetEditForm && editingStreet && (
+        <StreetEditForm
+          street={editingStreet}
+          onClose={() => {
+            setShowStreetEditForm(false);
+            setEditingStreet(null);
+          }}
+          onSubmit={handleStreetEditSubmit}
+        />
+      )}
+
+      {/* CDA Edit Form Modal */}
+      {showCdaEditForm && editingCda && (
+        <CdaEditForm
+          cda={editingCda}
+          onClose={() => {
+            setShowCdaEditForm(false);
+            setEditingCda(null);
+          }}
+          onSubmit={handleCdaEditSubmit}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Confirm Delete</h3>
+            <p className="text-muted-foreground mb-6">Are you sure you want to delete this {deletingType}? This action cannot be undone.</p>
+            <div className="flex justify-end space-x-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeletingCdaId(null);
+                  setDeletingStreetId(null);
+                  setDeletingType(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={confirmDelete}>
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

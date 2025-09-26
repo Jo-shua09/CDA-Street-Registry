@@ -16,7 +16,7 @@ interface Street {
   registrationDate: string;
   description: string;
   properties: Array<{ type: string }>;
-  propertyCount?: {
+  propertyCount: {
     houses: number;
     shops: number;
     hotels: number;
@@ -38,10 +38,10 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
     lg: street.lg,
     lcda: street.lcda,
     description: street.description,
-    houses: street.propertyCount?.houses || 0,
-    shops: street.propertyCount?.shops || 0,
-    hotels: street.propertyCount?.hotels || 0,
-    others: street.propertyCount?.others || 0,
+    houses: street.propertyCount.houses,
+    shops: street.propertyCount.shops,
+    hotels: street.propertyCount.hotels,
+    others: street.propertyCount.others,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -70,7 +70,14 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const updatedStreet = {
+      // Create properties array based on updated counts
+      const properties: Array<{ type: string }> = [];
+      for (let i = 0; i < formData.houses; i++) properties.push({ type: "house" });
+      for (let i = 0; i < formData.shops; i++) properties.push({ type: "shop" });
+      for (let i = 0; i < formData.hotels; i++) properties.push({ type: "hotel" });
+      for (let i = 0; i < formData.others; i++) properties.push({ type: "other" });
+
+      const updatedStreet: Street = {
         ...street,
         name: formData.name,
         cda: formData.cda,
@@ -84,6 +91,7 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
           hotels: formData.hotels,
           others: formData.others,
         },
+        properties,
       };
 
       onSubmit(updatedStreet);

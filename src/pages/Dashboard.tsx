@@ -224,11 +224,11 @@ const Dashboard = () => {
       <header className="bg-card border-b border-border sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-row items-center justify-between pt-6 h-16 py-4 sm:py-0">
-            <div className="flex items-center space-x-2 mb-4 sm:mb-0">
+            <div className="flex items-center space-x-1">
               <img src="./logo.png" alt="CDA Registry Logo" className="h-10 w-10 object-contain" />
               <div>
                 <h1 className="text-sm sm:text-lg font-semibold text-foreground">Street Registry</h1>
-                <p className="text-xs sm:text-sm text-muted-foreground">Street & Property Management</p>
+                <p className="text-xs sm:block hidden sm:text-sm text-muted-foreground">Street & Property Management</p>
               </div>
             </div>
 

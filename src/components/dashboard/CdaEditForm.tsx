@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 interface Cda {
   id: number;
   name: string;
-  state: string;
+  ward: string;
   lg: string;
   description: string;
   registrationDate: string;
@@ -24,10 +24,13 @@ interface CdaEditFormProps {
 export const CdaEditForm = ({ cda, onClose, onSubmit }: CdaEditFormProps) => {
   const [formData, setFormData] = useState({
     name: cda.name,
-    state: cda.state,
+    ward: cda.ward,
     lg: cda.lg,
     description: cda.description,
   });
+
+  // Fix validation to check ward instead of state
+  const isValid = formData.name && formData.ward && formData.lg;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -38,7 +41,7 @@ export const CdaEditForm = ({ cda, onClose, onSubmit }: CdaEditFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.state || !formData.lg) {
+    if (!formData.name || !formData.ward || !formData.lg) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields",
@@ -56,7 +59,7 @@ export const CdaEditForm = ({ cda, onClose, onSubmit }: CdaEditFormProps) => {
       const updatedCda = {
         ...cda,
         name: formData.name,
-        state: formData.state,
+        ward: formData.ward,
         lg: formData.lg,
         description: formData.description,
       };
@@ -102,14 +105,8 @@ export const CdaEditForm = ({ cda, onClose, onSubmit }: CdaEditFormProps) => {
 
           <div className="flex items-center gap-4 w-full">
             <div className="space-y-2 w-full">
-              <Label htmlFor="state">State *</Label>
-              <Input
-                id="state"
-                placeholder="Enter state"
-                value={formData.state}
-                onChange={(e) => handleInputChange("state", e.target.value)}
-                required
-              />
+              <Label htmlFor="ward">Ward *</Label>
+              <Input id="ward" placeholder="Enter ward" value={formData.ward} onChange={(e) => handleInputChange("ward", e.target.value)} required />
             </div>
 
             <div className="space-y-2 w-full">

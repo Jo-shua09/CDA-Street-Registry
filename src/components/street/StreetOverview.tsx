@@ -9,7 +9,7 @@ interface StreetOverviewProps {
     id: number;
     name: string;
     cda: string;
-    state: string;
+    ward: string;
     lg: string;
     lcda: string;
     registrationDate: string;
@@ -86,7 +86,7 @@ export const StreetOverview = ({ street, handleEditStreet }: StreetOverviewProps
             <div className="my-5">
               <div className="grid grid-cols-2 max-w-fit sm:grid-cols-2 lg:grid-cols-3 items-end gap-y-1 gap-x-2 mt-1">
                 <Badge variant="outline" className="text-xs text-nowrap w-fit">
-                  {street.state}
+                  {street.ward}
                 </Badge>
                 <Badge variant="outline" className="text-xs text-nowrap w-fit">
                   {street.lg}

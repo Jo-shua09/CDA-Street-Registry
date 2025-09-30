@@ -1,249 +1,97 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Search, Filter, MapPin, Home, X, Users, Plus, Menu, LogOut, Building, Printer, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
-import { FilterPanel } from "@/components/dashboard/FilterPanel";
-import { CdaCard } from "@/components/dashboard/CdaCard";
+import { ChevronRight, Building, MapPin, Home, Printer, ChevronDown, LogOut, Plus } from "lucide-react";
 import { StreetForm } from "@/components/street/StreetForm";
 import { CdaForm } from "@/components/dashboard/CdaForm";
-import { CdaEditForm } from "@/components/dashboard/CdaEditForm";
-import { StreetEditForm } from "@/components/street/StreetEditForm";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-// import logo from "/logo.png";
+
+interface WardStats {
+  name: string;
+  cdaCount: number;
+}
 
 interface StreetFormData {
   name: string;
+  ward: string;
   cda: string;
-  state: string;
-  lg: string;
-  lcda: string;
   description: string;
-  houses: number;
-  shops: number;
-  hotels: number;
-  others: number;
   registrationDate: string;
 }
 
-interface CdaData {
-  id: number;
+interface CdaFormData {
   name: string;
-  state: string;
+  ward: string;
   lg: string;
   description: string;
   registrationDate: string;
 }
 
-interface Street {
-  id: number;
-  name: string;
-  cda: string;
-  state: string;
-  lg: string;
-  lcda: string;
-  registrationDate: string;
-  description: string;
-  properties: Array<{ type: string }>;
-  propertyCount: {
-    houses: number;
-    shops: number;
-    hotels: number;
-    others: number;
-  };
-}
-
-// Mock data
-const mockCDAs = [
-  {
-    id: 1,
-    name: "Phase 1 CDA",
-    state: "Lagos State",
-    lg: "Lagos Island LGA",
-    description: "First phase CDA",
-    registrationDate: "2023-01-01",
-  },
+// Updated mock data for streets with CDA names
+const mockStreets = [
+  { id: 1, name: "Ahmadu Bello Avenue", ward: "Ward C1", cdaName: "Phase 1 CDA", propertyCount: 2 },
+  { id: 2, name: "Allen Avenue", ward: "Ward C2", cdaName: "Sunrise CDA", propertyCount: 2 },
+  { id: 3, name: "Palm Street", ward: "Ward C3", cdaName: "Palm Grove CDA", propertyCount: 2 },
+  { id: 4, name: "Royal Road", ward: "Ward C4", cdaName: "Royal Estate CDA", propertyCount: 2 },
+  { id: 5, name: "Mountain View", ward: "Ward C5", cdaName: "Mountain Top CDA", propertyCount: 2 },
+  { id: 6, name: "River Bank", ward: "Ward C6", cdaName: "River Side CDA", propertyCount: 2 },
 ];
 
-const mockStreets = [
-  {
-    id: 1,
-    name: "Ahmadu Bello Avenue",
-    cda: "Phase 1 CDA",
-    state: "Lagos State",
-    lg: "Lagos Island LGA",
-    lcda: "Victoria Island LCDA",
-    propertyCount: {
-      houses: 1,
-      shops: 1,
-      hotels: 1,
-      others: 1,
-    },
-    registrationDate: "2023-03-15",
-    description: "Main commercial avenue with mixed residential and commercial properties",
-    properties: [{ type: "house" }, { type: "shop" }, { type: "hotel" }, { type: "other" }],
-  },
+const mockCDAs = [
+  { id: 1, name: "Phase 1 CDA", ward: "Ward C1", streetCount: 2, propertyCount: 1 },
+  { id: 2, name: "Sunrise CDA", ward: "Ward C2", streetCount: 3, propertyCount: 2 },
+  { id: 3, name: "Palm Grove CDA", ward: "Ward C3", streetCount: 4, propertyCount: 2 },
+  { id: 4, name: "Royal Estate CDA", ward: "Ward C4", streetCount: 1, propertyCount: 2 },
+  { id: 5, name: "Mountain Top CDA", ward: "Ward C5", streetCount: 2, propertyCount: 2 },
+  { id: 6, name: "River Side CDA", ward: "Ward C6", streetCount: 3, propertyCount: 2 },
 ];
 
 const Dashboard = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
+  const navigate = useNavigate();
   const [showStreetForm, setShowStreetForm] = useState(false);
   const [showCdaForm, setShowCdaForm] = useState(false);
-  const [showCdaEditForm, setShowCdaEditForm] = useState(false);
-  const [showStreetEditForm, setShowStreetEditForm] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [editingCda, setEditingCda] = useState<CdaData | null>(null);
-  const [editingStreet, setEditingStreet] = useState<Street | null>(null);
-  const [deletingCdaId, setDeletingCdaId] = useState<number | null>(null);
-  const [deletingStreetId, setDeletingStreetId] = useState<number | null>(null);
-  const [deletingType, setDeletingType] = useState<"cda" | "street" | null>(null);
-  const [selectedFilters, setSelectedFilters] = useState({
-    cda: [],
-    propertyRange: { min: 0, max: 100 },
-    dateRange: { start: "", end: "" },
-  });
-  const [currentPage, setCurrentPage] = useState(1);
-  const navigate = useNavigate();
 
-  const itemsPerPage = 12; // Max 12 CDAs per page
+  // Generate wards data dynamically from mockCDAs
+  const wardsData: WardStats[] = mockCDAs.reduce((acc, cda) => {
+    const existing = acc.find((w) => w.name === cda.ward);
+    if (existing) {
+      existing.cdaCount++;
+    } else {
+      acc.push({ name: cda.ward, cdaCount: 1 });
+    }
+    return acc;
+  }, [] as WardStats[]);
 
   const handleLogout = () => {
     navigate("/");
+  };
+
+  const handleNavigateToWard = (wardName: string) => {
+    navigate(`/cda-directory?ward=${wardName}`);
   };
 
   const handleRegisterStreet = () => {
     setShowStreetForm(true);
   };
 
-  const handleStreetSubmit = (streetData: StreetFormData & { registrationDate: string }) => {
-    // Create properties array based on counts
-    const properties: Array<{ type: string }> = [];
-    for (let i = 0; i < streetData.houses; i++) properties.push({ type: "house" });
-    for (let i = 0; i < streetData.shops; i++) properties.push({ type: "shop" });
-    for (let i = 0; i < streetData.hotels; i++) properties.push({ type: "hotel" });
-    for (let i = 0; i < streetData.others; i++) properties.push({ type: "other" });
-
-    // Add the new street to mock data
-    const newStreet: Street = {
-      id: mockStreets.length + 1,
-      name: streetData.name,
-      cda: streetData.cda,
-      state: streetData.state,
-      lg: streetData.lg,
-      lcda: streetData.lcda,
-      propertyCount: {
-        houses: streetData.houses,
-        shops: streetData.shops,
-        hotels: streetData.hotels,
-        others: streetData.others,
-      },
-      registrationDate: streetData.registrationDate,
-      description: streetData.description,
-      properties,
-    };
-
-    // Update mock data (in a real app, this would be an API call)
-    mockStreets.push(newStreet);
-  };
-
   const handleRegisterCda = () => {
     setShowCdaForm(true);
   };
 
-  const handleCdaSubmit = (cdaData: CdaData & { registrationDate: string }) => {
-    const newCda = {
-      id: mockCDAs.length + 1,
-      ...cdaData,
-    };
-    mockCDAs.push(newCda);
+  const handleStreetSubmit = (streetData: StreetFormData & { registrationDate: string }) => {
+    console.log("Street submitted:", streetData);
+    setShowStreetForm(false);
   };
 
-  const handleEditCda = (cda: CdaData) => {
-    setEditingCda(cda);
-    setShowCdaEditForm(true);
+  const handleCdaSubmit = (cdaData: CdaFormData & { registrationDate: string }) => {
+    console.log("CDA submitted:", cdaData);
+    setShowCdaForm(false);
   };
 
-  const handleCdaEditSubmit = (updatedCda: CdaData) => {
-    const index = mockCDAs.findIndex((cda) => cda.id === updatedCda.id);
-    if (index !== -1) {
-      mockCDAs[index] = updatedCda;
-    }
-    setShowCdaEditForm(false);
-    setEditingCda(null);
-  };
-
-  const handleDeleteCda = (cdaId: number) => {
-    setDeletingType("cda");
-    setDeletingCdaId(cdaId);
-    setShowDeleteConfirm(true);
-  };
-
-  const confirmDelete = () => {
-    if (deletingType === "cda" && deletingCdaId !== null) {
-      const index = mockCDAs.findIndex((cda) => cda.id === deletingCdaId);
-      if (index !== -1) {
-        mockCDAs.splice(index, 1);
-      }
-    } else if (deletingType === "street" && deletingStreetId !== null) {
-      const index = mockStreets.findIndex((street) => street.id === deletingStreetId);
-      if (index !== -1) {
-        mockStreets.splice(index, 1);
-      }
-    }
-    setShowDeleteConfirm(false);
-    setDeletingCdaId(null);
-    setDeletingStreetId(null);
-    setDeletingType(null);
-  };
-
-  const handleStreetClick = (streetId: number) => {
-    // For now, just navigate to street details
-    navigate(`/street/${streetId}`);
-  };
-
-  const handleEditStreet = (street: Street) => {
-    setEditingStreet(street);
-    setShowStreetEditForm(true);
-  };
-
-  const handleStreetEditSubmit = (updatedStreet: Street) => {
-    const index = mockStreets.findIndex((s) => s.id === updatedStreet.id);
-    if (index !== -1) {
-      mockStreets[index] = updatedStreet;
-    }
-    setShowStreetEditForm(false);
-    setEditingStreet(null);
-  };
-
-  const handleDeleteStreet = (streetId: number) => {
-    setDeletingType("street");
-    setDeletingStreetId(streetId);
-    setShowDeleteConfirm(true);
-  };
-
-  // Print functions
   const printCDAs = () => {
-    // Create a new window for printing
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
-
-    const cdaData = mockCDAs.map((cda, index) => {
-      const streets = groupedStreets[cda.name] || [];
-      const totalProperties = streets.reduce((sum, street) => {
-        return sum + street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others;
-      }, 0);
-
-      return {
-        number: index + 1,
-        name: cda.name,
-        streetsCount: streets.length,
-        propertiesCount: totalProperties,
-      };
-    });
 
     const html = `
       <!DOCTYPE html>
@@ -271,19 +119,21 @@ const Dashboard = () => {
               <tr>
                 <th>#</th>
                 <th>CDA Name</th>
+                <th>Ward</th>
                 <th>Number of Streets</th>
                 <th>Total Properties</th>
               </tr>
             </thead>
             <tbody>
-              ${cdaData
+              ${mockCDAs
                 .map(
-                  (cda) => `
+                  (cda, index) => `
                 <tr>
-                  <td>${cda.number}</td>
+                  <td>${index + 1}</td>
                   <td>${cda.name}</td>
-                  <td>${cda.streetsCount}</td>
-                  <td>${cda.propertiesCount}</td>
+                  <td>${cda.ward}</td>
+                  <td>${cda.streetCount}</td>
+                  <td>${cda.propertyCount}</td>
                 </tr>
               `
                 )
@@ -304,117 +154,68 @@ const Dashboard = () => {
   };
 
   const printStreets = () => {
-    // Create a new window for printing
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
 
-    const streetData = mockStreets.map((street, index) => {
-      const totalProperties = street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others;
-      const registrationDate = new Date(street.registrationDate).toLocaleDateString();
-
-      return {
-        number: index + 1,
-        name: street.name,
-        cda: street.cda,
-        properties: totalProperties,
-        registrationDate: registrationDate,
-      };
-    });
-
     const html = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Registered Streets Report</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            h1 { text-align: center; color: #333; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; font-weight: bold; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #666; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>Registered Streets Report</h1>
-            <p>Generated on: ${new Date().toLocaleDateString()}</p>
-          </div>
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Registered Streets Report</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          h1 { text-align: center; color: #333; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f2f2f2; font-weight: bold; }
+          .header { text-align: center; margin-bottom: 30px; }
+          .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Registered Streets Report</h1>
+          <p>Generated on: ${new Date().toLocaleDateString()}</p>
+        </div>
 
-          <table>
-            <thead>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Street Name</th>
+              <th>Ward</th>
+              <th>CDA Name</th>
+              <th>Number of Properties</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${mockStreets
+              .map(
+                (street, index) => `
               <tr>
-                <th>#</th>
-                <th>Street Name</th>
-                <th>CDA</th>
-                <th>Properties</th>
-                <th>Registration Date</th>
+                <td>${index + 1}</td>
+                <td>${street.name}</td>
+                <td>${street.ward}</td>
+                <td>${street.cdaName || "Multiple CDAs"}</td>
+                <td>${street.propertyCount}</td>
               </tr>
-            </thead>
-            <tbody>
-              ${streetData
-                .map(
-                  (street) => `
-                <tr>
-                  <td>${street.number}</td>
-                  <td>${street.name}</td>
-                  <td>${street.cda}</td>
-                  <td>${street.properties}</td>
-                  <td>${street.registrationDate}</td>
-                </tr>
-              `
-                )
-                .join("")}
-            </tbody>
-          </table>
+            `
+              )
+              .join("")}
+          </tbody>
+        </table>
 
-          <div class="footer">
-            <p>Total Streets: ${mockStreets.length}</p>
-          </div>
-        </body>
-      </html>
-    `;
+        <div class="footer">
+          <p>Total Streets: ${mockStreets.length}</p>
+          <p>Total Properties: ${mockStreets.reduce((sum, street) => sum + street.propertyCount, 0)}</p>
+        </div>
+      </body>
+    </html>
+  `;
 
     printWindow.document.write(html);
     printWindow.document.close();
     printWindow.print();
-  };
-
-  // Group streets by CDA
-  const groupedStreets = mockStreets.reduce((acc, street) => {
-    if (!acc[street.cda]) {
-      acc[street.cda] = [];
-    }
-    acc[street.cda].push(street);
-    return acc;
-  }, {} as Record<string, typeof mockStreets>);
-
-  const filteredCdas = mockCDAs.filter((cda) => {
-    const streets = groupedStreets[cda.name] || [];
-    const matchesSearch =
-      cda.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      streets.some((street) => street.name.toLowerCase().includes(searchTerm.toLowerCase()));
-
-    const matchesCDA = selectedFilters.cda.length === 0 || selectedFilters.cda.includes(cda.name);
-
-    const totalProperties = streets.reduce((sum, street) => {
-      return sum + street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others;
-    }, 0);
-
-    const matchesPropertyCount = totalProperties >= selectedFilters.propertyRange.min && totalProperties <= selectedFilters.propertyRange.max;
-
-    return matchesSearch && matchesCDA && matchesPropertyCount;
-  });
-
-  // Pagination logic
-  const totalPages = Math.ceil(filteredCdas.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedCdas = filteredCdas.slice(startIndex, endIndex);
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
   };
 
   return (
@@ -462,11 +263,11 @@ const Dashboard = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Search and Stats */}
+        {/* Welcome Section */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-foreground">CDA Directory</h2>
+              <h2 className="text-2xl font-bold text-foreground">Ward Directory</h2>
               <p className="text-muted-foreground">Manage and monitor all registered CDAs and their streets</p>
             </div>
 
@@ -529,135 +330,48 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total Properties</p>
-                    <p className="text-2xl font-bold text-foreground">
-                      {mockStreets.reduce((sum, street) => {
-                        const total =
-                          street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others;
-                        return sum + total;
-                      }, 0)}
-                    </p>
+                    <p className="text-2xl font-bold text-foreground">{mockStreets.reduce((sum, street) => sum + street.propertyCount, 0)}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
-
-          {/* Search Bar */}
-          <div className="flex items-center w-full space-x-4">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2  -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search CDAs or streets..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-12 w-full text-lg placeholder:text-sm"
-              />
-            </div>
-
-            {/* Filter button */}
-            <Button variant="outline" size="lg" onClick={() => setShowFilters(!showFilters)} className="hidden sm:flex">
-              {!showFilters ? (
-                <>
-                  <Filter className="h-4 w-4" />
-                  Filters
-                </>
-              ) : (
-                <>
-                  <X className="h-4 w-4" />
-                  Close
-                </>
-              )}
-            </Button>
-          </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Filter Panel */}
-          {showFilters && (
-            <div className="lg:w-80">
-              <FilterPanel filters={selectedFilters} onFiltersChange={setSelectedFilters} streets={mockStreets} />
-            </div>
-          )}
+        {/* Wards Grid */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-foreground">All Wards</h3>
+          </div>
 
-          {/* CDA List */}
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-muted-foreground">
-                Showing {filteredCdas.length} of {mockCDAs.length} CDAs
-              </p>
-              <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)} className="lg:hidden">
-                {!showFilters ? (
-                  <>
-                    <Filter className="h-4 w-4" />
-                    Filters
-                  </>
-                ) : (
-                  <>
-                    <X className="h-4 w-4" />
-                    Close
-                  </>
-                )}
-              </Button>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {wardsData.map((ward) => (
+              <Card
+                key={ward.name}
+                className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
+                onClick={() => handleNavigateToWard(ward.name)}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-semibold text-foreground">{ward.name}</h4>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </div>
 
-            {filteredCdas.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <Building className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-foreground mb-2">No CDAs found</h3>
-                  <p className="text-muted-foreground">Try adjusting your search or filter criteria</p>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">CDAs</span>
+                      <span className="font-semibold">{ward.cdaCount}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-4 ">
+                    <Button variant="outline" size="sm" className="w-full">
+                      View CDAs
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
-            ) : (
-              <>
-                <div className="space-y-4">
-                  {paginatedCdas.map((cda) => (
-                    <CdaCard
-                      key={cda.id}
-                      cda={cda}
-                      streets={groupedStreets[cda.name] || []}
-                      onStreetClick={handleStreetClick}
-                      onEdit={handleEditCda}
-                      onDelete={handleDeleteCda}
-                      onEditStreet={handleEditStreet}
-                      onDeleteStreet={handleDeleteStreet}
-                    />
-                  ))}
-                </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="mt-8 flex justify-center">
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                          />
-                        </PaginationItem>
-
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                          <PaginationItem key={page}>
-                            <PaginationLink onClick={() => handlePageChange(page)} isActive={currentPage === page} className="cursor-pointer">
-                              {page}
-                            </PaginationLink>
-                          </PaginationItem>
-                        ))}
-
-                        <PaginationItem>
-                          <PaginationNext
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
-                )}
-              </>
-            )}
+            ))}
           </div>
         </div>
       </div>
@@ -667,56 +381,6 @@ const Dashboard = () => {
 
       {/* CDA Form Modal */}
       {showCdaForm && <CdaForm onClose={() => setShowCdaForm(false)} onSubmit={handleCdaSubmit} />}
-
-      {/* Street Edit Form Modal */}
-      {showStreetEditForm && editingStreet && (
-        <StreetEditForm
-          street={editingStreet}
-          onClose={() => {
-            setShowStreetEditForm(false);
-            setEditingStreet(null);
-          }}
-          onSubmit={handleStreetEditSubmit}
-        />
-      )}
-
-      {/* CDA Edit Form Modal */}
-      {showCdaEditForm && editingCda && (
-        <CdaEditForm
-          cda={editingCda}
-          onClose={() => {
-            setShowCdaEditForm(false);
-            setEditingCda(null);
-          }}
-          onSubmit={handleCdaEditSubmit}
-        />
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Confirm Delete</h3>
-            <p className="text-muted-foreground mb-6">Are you sure you want to delete this {deletingType}? This action cannot be undone.</p>
-            <div className="flex justify-end space-x-3">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowDeleteConfirm(false);
-                  setDeletingCdaId(null);
-                  setDeletingStreetId(null);
-                  setDeletingType(null);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button variant="destructive" onClick={confirmDelete}>
-                Delete
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

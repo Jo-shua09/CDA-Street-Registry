@@ -4,11 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
 interface CdaFormData {
   name: string;
-  state: string;
+  ward: string;
   lg: string;
   description: string;
 }
@@ -21,10 +22,13 @@ interface CdaFormProps {
 export const CdaForm = ({ onClose, onSubmit }: CdaFormProps) => {
   const [formData, setFormData] = useState<CdaFormData>({
     name: "",
-    state: "",
+    ward: "",
     lg: "",
     description: "",
   });
+
+  // Fix validation to check ward instead of state
+  const isValid = formData.name && formData.ward && formData.lg;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -35,7 +39,7 @@ export const CdaForm = ({ onClose, onSubmit }: CdaFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.state || !formData.lg) {
+    if (!formData.name || !formData.ward || !formData.lg) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields",
@@ -96,14 +100,20 @@ export const CdaForm = ({ onClose, onSubmit }: CdaFormProps) => {
 
           <div className="flex items-center gap-4 w-full">
             <div className="space-y-2 w-full">
-              <Label htmlFor="state">State *</Label>
-              <Input
-                id="state"
-                placeholder="Enter state"
-                value={formData.state}
-                onChange={(e) => handleInputChange("state", e.target.value)}
-                required
-              />
+              <Label htmlFor="ward">Ward *</Label>
+              <Select value={formData.ward} onValueChange={(value) => handleInputChange("ward", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select ward" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Ward C1">Ward C1</SelectItem>
+                  <SelectItem value="Ward C2">Ward C2</SelectItem>
+                  <SelectItem value="Ward C3">Ward C3</SelectItem>
+                  <SelectItem value="Ward C4">Ward C4</SelectItem>
+                  <SelectItem value="Ward C5">Ward C5</SelectItem>
+                  <SelectItem value="Ward C6">Ward C6</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2 w-full">

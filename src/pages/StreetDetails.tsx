@@ -21,18 +21,17 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-// Mock data
+// Minimal mock data - 1 example street with 1 property
 const mockStreetData = {
   1: {
     id: 1,
     name: "Ahmadu Bello Avenue",
     cda: "Phase 1 CDA",
-    state: "Lagos State",
+    ward: "Ward C1",
     lg: "Lagos Island LGA",
     lcda: "Victoria Island LCDA",
     registrationDate: "2023-03-15",
-    description:
-      "Main commercial avenue with mixed residential and commercial properties. This street serves as a major thoroughfare connecting various residential estates to the central business district.",
+    description: "Main commercial avenue with mixed residential and commercial properties.",
     propertyCount: {
       houses: 1,
       shops: 1,
@@ -169,9 +168,9 @@ const StreetDetails = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="w-fit mb-6">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
+            Back
           </Button>
         </div>
 

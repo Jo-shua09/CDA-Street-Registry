@@ -10,7 +10,7 @@ interface Street {
   id: number;
   name: string;
   cda: string;
-  state: string;
+  ward: string;
   lg: string;
   lcda: string;
   registrationDate: string;
@@ -34,7 +34,7 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
   const [formData, setFormData] = useState({
     name: street.name,
     cda: street.cda,
-    state: street.state,
+    ward: street.ward,
     lg: street.lg,
     lcda: street.lcda,
     description: street.description,
@@ -55,7 +55,7 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.cda || !formData.state || !formData.lg || !formData.lcda) {
+    if (!formData.name || !formData.cda || !formData.ward || !formData.lg || !formData.lcda) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields",
@@ -81,7 +81,7 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
         ...street,
         name: formData.name,
         cda: formData.cda,
-        state: formData.state,
+        ward: formData.ward,
         lg: formData.lg,
         lcda: formData.lcda,
         description: formData.description,
@@ -135,14 +135,8 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
 
           <div className="flex items-center w-full gap-4">
             <div className="space-y-2 w-full">
-              <Label htmlFor="state">State *</Label>
-              <Input
-                id="state"
-                placeholder="Enter state"
-                value={formData.state}
-                onChange={(e) => handleInputChange("state", e.target.value)}
-                required
-              />
+              <Label htmlFor="ward">Ward *</Label>
+              <Input id="ward" placeholder="Enter ward" value={formData.ward} onChange={(e) => handleInputChange("ward", e.target.value)} required />
             </div>
 
             <div className="space-y-2 w-full">

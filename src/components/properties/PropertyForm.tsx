@@ -1,14 +1,13 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Home, Store, Hotel, Building, Upload, X, FileImage, File, Check, Image, Eye, Download } from "lucide-react";
+import { Home, Store, Hotel, Building, Upload, X, FileImage, File, Image, Eye, Download, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
@@ -27,22 +26,17 @@ interface Property {
     type: string;
     description: string;
   }>;
-  houseName?: string; // For shops - name of the house they're part of
+  houseName?: string;
+  images?: Array<{ id: string; file: File; preview: string }>;
+  documents?: Array<{ id: string; name: string; file: File }>;
 }
 
 interface PropertyFormProps {
   property?: Property;
   streetName: string;
-  onSubmit: (data: Property & { files: File[]; streetName: string }) => void;
+  onSubmit: (data: Property) => void;
   onClose: () => void;
 }
-
-const propertyTypes = [
-  { value: "House", label: "House", icon: Home },
-  { value: "Shop", label: "Shop", icon: Store },
-  { value: "Hotel", label: "Hotel", icon: Hotel },
-  { value: "Office", label: "Office", icon: Building },
-];
 
 export const PropertyForm = ({ property, streetName, onSubmit, onClose }: PropertyFormProps) => {
   const [formData, setFormData] = useState({
@@ -54,18 +48,21 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
     hasShops: property?.hasShops || false,
     shopCount: property?.shopCount || 0,
     shops: property?.shops || [],
-    houseName: property?.houseName || "", // For shops - name of the house they're part of
+    houseName: property?.houseName || "",
   });
-  const [files, setFiles] = useState<File[]>([]);
+  const [images, setImages] = useState<Array<{ id: string; file: File; preview: string }>>(property?.images || []);
+  const [documents, setDocuments] = useState<Array<{ id: string; name: string; file: File }>>(property?.documents || []);
+  const [documentName, setDocumentName] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+
+  const documentInputRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
-      // Reset shop count if "No" is selected for shops
       ...(field === "hasShops" && value === false && { shopCount: 0, shops: [] }),
     }));
   };
@@ -80,13 +77,72 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
     setFormData((prev) => ({ ...prev, shops: updatedShops }));
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newFiles = Array.from(event.target.files || []);
-    setFiles((prev) => [...prev, ...newFiles]);
+
+    newFiles.forEach((file) => {
+      if (file.type.startsWith("image/")) {
+        const preview = URL.createObjectURL(file);
+        setImages((prev) => [
+          ...prev,
+          {
+            id: Math.random().toString(36).substr(2, 9),
+            file,
+            preview,
+          },
+        ]);
+      }
+    });
+
+    // Reset file input
+    event.target.value = "";
   };
 
-  const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
+  const handleDocumentUploadClick = () => {
+    if (!documentName.trim()) {
+      toast({
+        title: "Document Name Required",
+        description: "Please enter a name for the document before uploading",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Trigger the file input click
+    if (documentInputRef.current) {
+      documentInputRef.current.click();
+    }
+  };
+
+  const handleDocumentFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newFiles = Array.from(event.target.files || []);
+
+    newFiles.forEach((file) => {
+      if (!file.type.startsWith("image/")) {
+        setDocuments((prev) => [
+          ...prev,
+          {
+            id: Math.random().toString(36).substr(2, 9),
+            name: documentName,
+            file,
+          },
+        ]);
+
+        // Reset document name after successful upload
+        setDocumentName("");
+      }
+    });
+
+    // Reset file input
+    event.target.value = "";
+  };
+
+  const removeImage = (id: string) => {
+    setImages((prev) => prev.filter((img) => img.id !== id));
+  };
+
+  const removeDocument = (id: string) => {
+    setDocuments((prev) => prev.filter((doc) => doc.id !== id));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -109,10 +165,10 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
 
       const propertyData = {
         ...formData,
-        files,
+        images,
+        documents,
         streetName,
         registrationDate: property?.registrationDate || new Date().toISOString(),
-        // Ensure shops array has correct number of entries
         shops: formData.hasShops
           ? Array.from({ length: formData.shopCount }, (_, i) => formData.shops[i] || { number: "", type: "", description: "" })
           : [],
@@ -133,13 +189,6 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const getFileIcon = (file: File) => {
-    if (file.type.startsWith("image/")) {
-      return <FileImage className="h-4 w-4 text-primary" />;
-    }
-    return <File className="h-4 w-4 text-muted-foreground" />;
   };
 
   const formatFileSize = (bytes: number) => {
@@ -361,137 +410,128 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
           <div className="space-y-4">
             <Label className="text-base font-medium">Property Files & Documents</Label>
 
-            {/* Upload Area */}
-            <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
-              <input type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt" onChange={handleFileUpload} className="hidden" id="file-upload" />
-              <label htmlFor="file-upload" className="cursor-pointer">
-                <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm text-foreground">
-                  <span className="font-medium text-primary">Click to upload</span> or drag and drop
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">Images (JPG, PNG, GIF), PDFs, and documents (Max 10MB each)</p>
-              </label>
-            </div>
+            <Tabs defaultValue="images" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="images" className="text-sm">
+                  Images ({images.length})
+                </TabsTrigger>
+                <TabsTrigger value="documents" className="text-sm">
+                  Documents ({documents.length})
+                </TabsTrigger>
+              </TabsList>
 
-            {/* File Management Tabs */}
-            {files.length > 0 && (
-              <Tabs defaultValue="all" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="all" className="text-xs">
-                    All Files ({files.length})
-                  </TabsTrigger>
-                  <TabsTrigger value="images" className="text-xs">
-                    Images ({files.filter((f) => f.type.startsWith("image/")).length})
-                  </TabsTrigger>
-                  <TabsTrigger value="documents" className="text-xs">
-                    Documents ({files.filter((f) => !f.type.startsWith("image/")).length})
-                  </TabsTrigger>
-                </TabsList>
+              {/* Images Tab */}
+              <TabsContent value="images" className="space-y-4 mt-4">
+                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
+                  <input type="file" multiple accept="image/*" onChange={handleImageUpload} className="hidden" id="image-upload" />
+                  <label htmlFor="image-upload" className="cursor-pointer">
+                    <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-foreground">
+                      <span className="font-medium text-primary">Click to upload images</span> or drag and drop
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">JPG, PNG, GIF (Max 10MB each)</p>
+                  </label>
+                </div>
 
-                <TabsContent value="all" className="mt-4">
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {files.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          {getFileIcon(file)}
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-foreground truncate">{file.name}</p>
-                            <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
-                          </div>
+                {images.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {images.map((image) => (
+                      <div key={image.id} className="relative group">
+                        <div className="aspect-square bg-muted rounded-lg border overflow-hidden">
+                          <img src={image.preview} alt="Property" className="w-full h-full object-cover" />
                         </div>
-                        <div className="flex items-center gap-2">
-                          {file.type.startsWith("image/") && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                const reader = new FileReader();
-                                reader.onload = (e) => setImagePreview(e.target?.result as string);
-                                reader.readAsDataURL(file);
-                              }}
-                              className="text-muted-foreground hover:text-primary"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          )}
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeFile(index)}
-                            className="text-muted-foreground hover:text-destructive"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => removeImage(image.id)}
+                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setImagePreview(image.preview)}
+                          className="absolute bottom-2 right-2 h-6 px-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Eye className="h-3 w-3 mr-1" />
+                          View
+                        </Button>
                       </div>
                     ))}
                   </div>
-                </TabsContent>
+                )}
+              </TabsContent>
 
-                <TabsContent value="images" className="mt-4">
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-48 overflow-y-auto">
-                    {files
-                      .filter((f) => f.type.startsWith("image/"))
-                      .map((file, index) => (
-                        <div key={index} className="relative group">
-                          <div className="aspect-square bg-muted rounded-lg border overflow-hidden">
-                            <img
-                              src={URL.createObjectURL(file)}
-                              alt={file.name}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.currentTarget.style.display = "none";
-                                e.currentTarget.nextElementSibling?.classList.remove("hidden");
-                              }}
-                            />
-                            <div className="hidden absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground text-xs">
-                              Preview unavailable
-                            </div>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => removeFile(files.indexOf(file))}
-                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
+              {/* Documents Tab */}
+              <TabsContent value="documents" className="space-y-4 mt-4">
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <Label htmlFor="document-name" className="text-sm">
+                        Document Name *
+                      </Label>
+                      <Input
+                        id="document-name"
+                        placeholder="e.g., Property Deed, Invoice, Tax Receipt"
+                        value={documentName}
+                        onChange={(e) => setDocumentName(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <input
+                        ref={documentInputRef}
+                        type="file"
+                        accept=".pdf,.doc,.docx,.txt"
+                        onChange={handleDocumentFileSelect}
+                        className="hidden"
+                        id="document-upload"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleDocumentUploadClick}
+                        disabled={!documentName.trim()}
+                        className="whitespace-nowrap"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Upload Document
+                      </Button>
+                    </div>
                   </div>
-                </TabsContent>
+                  <p className="text-xs text-muted-foreground">Enter document name first, then upload the file</p>
+                </div>
 
-                <TabsContent value="documents" className="mt-4">
+                {documents.length > 0 && (
                   <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {files
-                      .filter((f) => !f.type.startsWith("image/"))
-                      .map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            {getFileIcon(file)}
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-foreground truncate">{file.name}</p>
-                              <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
-                            </div>
+                    {documents.map((doc) => (
+                      <div key={doc.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <File className="h-4 w-4 text-muted-foreground" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-foreground">{doc.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {doc.file.name} • {formatFileSize(doc.file.size)}
+                            </p>
                           </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeFile(files.indexOf(file))}
-                            className="text-muted-foreground hover:text-destructive"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
                         </div>
-                      ))}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeDocument(doc.id)}
+                          className="text-muted-foreground hover:text-destructive"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
                   </div>
-                </TabsContent>
-              </Tabs>
-            )}
+                )}
+              </TabsContent>
+            </Tabs>
 
             {/* Image Preview Modal */}
             {imagePreview && (

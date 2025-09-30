@@ -9,7 +9,7 @@ interface Street {
   id: number;
   name: string;
   cda: string;
-  state: string;
+  ward: string;
   lg: string;
   lcda: string;
   propertyCount: {
@@ -25,7 +25,7 @@ interface Street {
 interface CdaData {
   id: number;
   name: string;
-  state: string;
+  ward: string;
   lg: string;
   description: string;
   registrationDate: string;
@@ -148,7 +148,7 @@ export const CdaCard = ({ cda, streets, onStreetClick, onEdit, onDelete, onEditS
                       <div className="min-w-0 flex-1">
                         <h4 className="font-medium text-foreground truncate">{street.name}</h4>
                         <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-1 text-xs sm:text-sm text-muted-foreground">
-                          <span className="truncate">{street.state}</span>
+                          <span className="truncate">{street.ward}</span>
                           <span>•</span>
                           <span className="truncate">{street.lg}</span>
                           <span>•</span>

@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Store } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,12 +28,11 @@ interface ShopDetail {
 interface StreetFormData {
   name: string;
   cda: string;
-  state: string;
+  ward: string;
   lg: string;
   lcda: string;
   description: string;
   houses: number;
-  shops: number;
   hotels: number;
   others: number;
   hasShops: boolean;
@@ -49,12 +49,11 @@ export const StreetForm = ({ onClose, onSubmit }: StreetFormProps) => {
   const [formData, setFormData] = useState<StreetFormData>({
     name: "",
     cda: "",
-    state: "",
+    ward: "",
     lg: "",
     lcda: "",
     description: "",
     houses: 0,
-    shops: 0,
     hotels: 0,
     others: 0,
     hasShops: false,
@@ -64,7 +63,7 @@ export const StreetForm = ({ onClose, onSubmit }: StreetFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const totalProperties = formData.houses + formData.shops + formData.hotels + formData.others;
+  const totalProperties = formData.houses + formData.hotels + formData.others;
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -84,7 +83,7 @@ export const StreetForm = ({ onClose, onSubmit }: StreetFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.cda || !formData.state || !formData.lg || !formData.lcda) {
+    if (!formData.name || !formData.cda || !formData.ward || !formData.lg || !formData.lcda) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields",
@@ -145,14 +144,20 @@ export const StreetForm = ({ onClose, onSubmit }: StreetFormProps) => {
 
           <div className="flex items-center w-full gap-4">
             <div className="space-y-2 w-full">
-              <Label htmlFor="state">State *</Label>
-              <Input
-                id="state"
-                placeholder="Enter state"
-                value={formData.state}
-                onChange={(e) => handleInputChange("state", e.target.value)}
-                required
-              />
+              <Label htmlFor="ward">Ward *</Label>
+              <Select value={formData.ward} onValueChange={(value) => handleInputChange("ward", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select ward" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Ward C1">Ward C1</SelectItem>
+                  <SelectItem value="Ward C2">Ward C2</SelectItem>
+                  <SelectItem value="Ward C3">Ward C3</SelectItem>
+                  <SelectItem value="Ward C4">Ward C4</SelectItem>
+                  <SelectItem value="Ward C5">Ward C5</SelectItem>
+                  <SelectItem value="Ward C6">Ward C6</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2 w-full">
@@ -298,7 +303,7 @@ export const StreetForm = ({ onClose, onSubmit }: StreetFormProps) => {
 
           <div className="space-y-4">
             <Label className="text-base font-medium">Property Count</Label>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="houses">Houses</Label>
                 <Input
@@ -308,17 +313,6 @@ export const StreetForm = ({ onClose, onSubmit }: StreetFormProps) => {
                   placeholder="0"
                   value={formData.houses}
                   onChange={(e) => handleInputChange("houses", parseInt(e.target.value) || 0)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="shops">Shops</Label>
-                <Input
-                  id="shops"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  value={formData.shops}
-                  onChange={(e) => handleInputChange("shops", parseInt(e.target.value) || 0)}
                 />
               </div>
               <div className="space-y-2">

@@ -3,7 +3,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Home, Store, Hotel, Building, Phone, Calendar, FileText, Edit, Trash2, StoreIcon, Image, File, Download, Eye, X } from "lucide-react";
 import { useState } from "react";
 
@@ -22,6 +21,9 @@ interface Property {
     type: string;
     description: string;
   }>;
+  houseName?: string;
+  images?: Array<{ id: string; file: File; preview: string }>;
+  documents?: Array<{ id: string; name: string; file: File }>;
 }
 
 interface PropertyDetailsProps {
@@ -34,7 +36,7 @@ interface PropertyDetailsProps {
 
 export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelete }: PropertyDetailsProps) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [selectedDocument, setSelectedDocument] = useState<string | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<{ name: string; file: File } | null>(null);
 
   const getPropertyIcon = (type: string) => {
     switch (type.toLowerCase()) {
@@ -57,34 +59,19 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
     });
   };
 
-  // Mock data for demonstration - in real app, this would come from props or API
-  const propertyImages = [
-    { id: 1, url: "/placeholder-image-1.jpg", name: "Front View", type: "image" },
-    { id: 2, url: "/placeholder-image-2.jpg", name: "Interior", type: "image" },
-    { id: 3, url: "/placeholder-image-3.jpg", name: "Back View", type: "image" },
-  ];
-
-  const propertyDocuments = [
-    { id: 1, url: "/deed-document.pdf", name: "Property Deed", type: "pdf", size: "2.5 MB" },
-    { id: 2, url: "/survey-plan.pdf", name: "Survey Plan", type: "pdf", size: "1.8 MB" },
-    { id: 3, url: "/tax-document.pdf", name: "Tax Clearance", type: "pdf", size: "850 KB" },
-  ];
-
-  const handleDownload = (fileUrl: string, fileName: string) => {
+  const handleDownload = (file: File, fileName: string) => {
+    const url = URL.createObjectURL(file);
     const link = document.createElement("a");
-    link.href = fileUrl;
+    link.href = url;
     link.download = fileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
-  const handleImageView = (imageUrl: string) => {
-    setSelectedImage(imageUrl);
-  };
-
-  const handleDocumentView = (documentUrl: string) => {
-    setSelectedDocument(documentUrl);
+  const handleDocumentView = (doc: { name: string; file: File }) => {
+    setSelectedDocument(doc);
   };
 
   return (
@@ -107,8 +94,8 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="images">Images ({propertyImages.length})</TabsTrigger>
-            <TabsTrigger value="documents">Documents ({propertyDocuments.length})</TabsTrigger>
+            <TabsTrigger value="images">Images ({property.images?.length || 0})</TabsTrigger>
+            <TabsTrigger value="documents">Documents ({property.documents?.length || 0})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -199,7 +186,7 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
                     ))}
                   </div>
                 </CardContent>
-              </Card>
+            </Card>
             )}
 
             {/* Property Description */}
@@ -220,33 +207,27 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
                 <div className="flex items-center gap-2 mb-4">
                   <Image className="h-5 w-5 text-primary" />
                   <h3 className="font-medium text-foreground">Property Images</h3>
-                  <Badge variant="secondary">{propertyImages.length} images</Badge>
+                  <Badge variant="secondary">{property.images?.length || 0} images</Badge>
                 </div>
 
-                {propertyImages.length === 0 ? (
+                {!property.images || property.images.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Image className="h-12 w-12 mx-auto mb-3 opacity-50" />
                     <p>No images uploaded for this property</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {propertyImages.map((image) => (
-                      <Card key={image.id} className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleImageView(image.url)}>
+                    {property.images.map((image) => (
+                      <Card key={image.id} className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedImage(image.preview)}>
                         <div className="aspect-square bg-muted relative">
                           <img
-                            src={image.url}
-                            alt={image.name}
+                            src={image.preview}
+                            alt="Property"
                             className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.src = "/placeholder.svg";
-                            }}
                           />
                           <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center">
                             <Eye className="h-6 w-6 text-white opacity-0 hover:opacity-100 transition-opacity" />
                           </div>
-                        </div>
-                        <div className="p-3">
-                          <p className="text-sm font-medium text-foreground">{image.name}</p>
                         </div>
                       </Card>
                     ))}
@@ -262,17 +243,17 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
                 <div className="flex items-center gap-2 mb-4">
                   <File className="h-5 w-5 text-primary" />
                   <h3 className="font-medium text-foreground">Property Documents</h3>
-                  <Badge variant="secondary">{propertyDocuments.length} documents</Badge>
+                  <Badge variant="secondary">{property.documents?.length || 0} documents</Badge>
                 </div>
 
-                {propertyDocuments.length === 0 ? (
+                {!property.documents || property.documents.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <File className="h-12 w-12 mx-auto mb-3 opacity-50" />
                     <p>No documents uploaded for this property</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {propertyDocuments.map((doc) => (
+                    {property.documents.map((doc) => (
                       <Card key={doc.id} className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -281,15 +262,15 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
                             </div>
                             <div>
                               <p className="font-medium text-foreground">{doc.name}</p>
-                              <p className="text-sm text-muted-foreground">{doc.size}</p>
+                              <p className="text-sm text-muted-foreground">{doc.file.name}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm" onClick={() => handleDocumentView(doc.url)}>
+                            <Button variant="outline" size="sm" onClick={() => handleDocumentView(doc)}>
                               <Eye className="h-4 w-4 mr-1" />
                               View
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => handleDownload(doc.url, doc.name)}>
+                            <Button variant="outline" size="sm" onClick={() => handleDownload(doc.file, doc.name)}>
                               <Download className="h-4 w-4 mr-1" />
                               Download
                             </Button>
@@ -316,9 +297,6 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
                   src={selectedImage}
                   alt="Property"
                   className="w-full h-auto max-h-96 object-contain"
-                  onError={(e) => {
-                    e.currentTarget.src = "/placeholder.svg";
-                  }}
                 />
                 <Button
                   variant="outline"
@@ -338,14 +316,19 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
           <Dialog open={!!selectedDocument} onOpenChange={() => setSelectedDocument(null)}>
             <DialogContent className="max-w-4xl">
               <DialogHeader>
-                <DialogTitle>Document Viewer</DialogTitle>
+                <DialogTitle>{selectedDocument.name}</DialogTitle>
               </DialogHeader>
               <div className="relative h-96">
-                <iframe
-                  src={selectedDocument}
-                  className="w-full h-full border rounded"
-                  title="Document Viewer"
-                />
+                <div className="flex items-center justify-center h-full bg-muted rounded-lg">
+                  <div className="text-center">
+                    <File className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground mb-4">Document preview not available</p>
+                    <Button onClick={() => handleDownload(selectedDocument.file, selectedDocument.name)}>
+                      <Download className="h-4 w-4 mr-2" />
+                      Download Document
+                    </Button>
+                  </div>
+                </div>
                 <Button
                   variant="outline"
                   size="sm"

@@ -16,15 +16,6 @@ export const getStoredCDAs = (): ExtendedCdaData[] => {
     return [];
   }
 };
-// replace with the PROPERTIES you want to delete
-const key = STORAGE_KEYS.PROPERTIES;
-
-if (localStorage.getItem(key)) {
-  localStorage.removeItem(key);
-  console.log(`${key} deleted successfully`);
-} else {
-  console.log(`${key} not found in localStorage`);
-}
 
 export const saveCDA = (cda: ExtendedCdaData): void => {
   try {

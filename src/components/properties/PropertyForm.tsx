@@ -15,6 +15,7 @@ import { convertPropertyForStorage, StoredProperty } from "@/utils/storage";
 
 interface Property {
   id?: number;
+  streetId?: number; // Add streetId to the interface
   number: string;
   type: string;
   owner: string;
@@ -196,19 +197,29 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
+      // FIX: Create complete property data with all necessary fields
       const propertyData = {
-        ...formData,
-        images,
-        documents,
-        streetName,
-        registrationDate: property?.registrationDate || new Date().toISOString(),
+        id: property?.id || Date.now(), // Preserve existing ID when editing
+        streetId: property?.streetId || 0, // Preserve streetId - THIS IS CRITICAL
+        number: formData.number,
+        type: formData.type,
+        owner: formData.owner,
+        contact: formData.contact,
+        description: formData.description,
+        registrationDate: property?.registrationDate || new Date().toISOString().split("T")[0], // Use proper date format
+        hasShops: formData.hasShops,
+        shopCount: formData.shopCount,
         shops: formData.hasShops
           ? Array.from({ length: formData.shopCount }, (_, i) => formData.shops[i] || { number: "", type: "", description: "" })
           : [],
+        houseNumber: formData.houseNumber,
+        images: images,
+        documents: documents,
       };
 
       // Convert File objects to base64 for storage
       const propertyForStorage = await convertPropertyForStorage(propertyData);
+
       onSubmit(propertyForStorage);
 
       toast({
@@ -216,6 +227,7 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
         description: `Property #${formData.number} has been ${property ? "updated" : "registered"} successfully.`,
       });
     } catch (error) {
+      console.error("Error submitting property:", error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",

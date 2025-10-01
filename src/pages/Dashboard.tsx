@@ -53,14 +53,7 @@ const Dashboard = () => {
   const logoUrl = "./logo.png";
 
   // Static wards data - hardcoded as requested
-  const staticWards = [
-    "Ward C1 (Central & Northern Igbogbo)",
-    "Ward C2 (South & Southwestern Igbogbo)",
-    "Ward C3 (Southeastern Igbogbo)",
-    "Ward C4 (Western & Industrial Corridor)",
-    "Ward C5 (Northwestern Igbogbo)",
-    "Ward C6 (Coastal & Eastern Igbogbo)",
-  ];
+  const staticWards = ["Ward C1", "Ward C2", "Ward C3", "Ward C4", "Ward C5", "Ward C6"];
 
   // Load data from localStorage on component mount and when refreshTrigger changes
   useEffect(() => {
@@ -124,7 +117,6 @@ const Dashboard = () => {
 
     // Use registrationDate from form data directly without overriding
     const registrationDate = streetData.registrationDate;
-    console.log("Dashboard - Registration date being saved:", registrationDate);
 
     const newStreet: ExtendedStreetData = {
       id: Date.now(),
@@ -141,8 +133,6 @@ const Dashboard = () => {
       propertyCount: { houses: 0, shops: 0, hotels: 0, others: 0 },
       properties: [],
     };
-
-    console.log("Dashboard - Street being saved:", newStreet);
 
     saveStreet(newStreet);
     setRefreshTrigger((prev) => prev + 1);

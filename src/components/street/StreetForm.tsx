@@ -152,14 +152,9 @@ export const StreetForm = ({ onClose, onSubmit, cdas }: StreetFormProps) => {
 
       // DEBUG: Log the current date
       const now = new Date();
-      console.log("Current date:", now);
-      console.log("Current date string:", now.toString());
-      console.log("Timezone offset:", now.getTimezoneOffset());
 
       // FIX: Create date in local timezone to avoid timezone issues
       const registrationDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split("T")[0];
-
-      console.log("Registration date being set:", registrationDate);
 
       const streetData = {
         id: Date.now(),

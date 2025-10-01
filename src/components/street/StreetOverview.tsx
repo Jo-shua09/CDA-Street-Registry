@@ -145,12 +145,20 @@ export const StreetOverview = ({ street, handleEditStreet }: StreetOverviewProps
                   </div>
                 </div>
               )}
-
               {street.image && (
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground mb-2">Street Image</h3>
                   <div className="relative">
-                    <img src={street.image} alt={`${street.name} street view`} className="w-full h-48 object-cover rounded-lg border" />
+                    <img
+                      src={street.image}
+                      alt={`${street.name} street view`}
+                      className="w-full h-48 object-cover rounded-lg border"
+                      onError={(e) => {
+                        // Handle broken images
+                        console.error("Image failed to load:", street.image);
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
                   </div>
                 </div>
               )}

@@ -73,9 +73,14 @@ export const CdaForm = ({ onClose, onSubmit }: CdaFormProps) => {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
+      const today = new Date();
+      const registrationDate =
+        today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
+
       const cdaData = {
+        id: Date.now(),
         ...formData,
-        registrationDate: new Date().toISOString().split("T")[0],
+        registrationDate,
       };
 
       onSubmit(cdaData);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Image } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ExtendedCdaData } from "@/data/mockData";
 
 interface StreetFormData {
   name: string;
@@ -17,15 +18,16 @@ interface StreetFormData {
   description: string;
   ownerName: string;
   ownerContact: string;
-  image?: File;
+  image?: File | string;
 }
 
 interface StreetFormProps {
   onClose: () => void;
   onSubmit: (streetData: StreetFormData & { registrationDate: string }) => void;
+  cdas: ExtendedCdaData[];
 }
 
-export const StreetForm = ({ onClose, onSubmit }: StreetFormProps) => {
+export const StreetForm = ({ onClose, onSubmit, cdas }: StreetFormProps) => {
   const [formData, setFormData] = useState<StreetFormData>({
     name: "",
     cda: "",
@@ -39,6 +41,11 @@ export const StreetForm = ({ onClose, onSubmit }: StreetFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Reset CDA when ward changes
+  useEffect(() => {
+    setFormData((prev) => ({ ...prev, cda: "" }));
+  }, [formData.ward]);
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -78,6 +85,53 @@ export const StreetForm = ({ onClose, onSubmit }: StreetFormProps) => {
     setImagePreview(null);
   };
 
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   if (!formData.name || !formData.cda || !formData.ward || !formData.lg || !formData.lcda) {
+  //     toast({
+  //       title: "Missing Information",
+  //       description: "Please fill in all required fields",
+  //       variant: "destructive",
+  //     });
+  //     return;
+  //   }
+
+  //   setIsSubmitting(true);
+
+  //   try {
+  //     // Simulate API call
+  //     await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  //     // FIX: Create date in local timezone to avoid timezone issues
+  //     const now = new Date();
+  //     const registrationDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+
+  //     const streetData = {
+  //       id: Date.now(),
+  //       ...formData,
+  //       registrationDate,
+  //     };
+
+  //     onSubmit(streetData);
+
+  //     toast({
+  //       title: "Street Registered",
+  //       description: `${formData.name} has been registered successfully.`,
+  //     });
+
+  //     onClose();
+  //   } catch (error) {
+  //     toast({
+  //       title: "Error",
+  //       description: "Something went wrong. Please try again.",
+  //       variant: "destructive",
+  //     });
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -96,9 +150,21 @@ export const StreetForm = ({ onClose, onSubmit }: StreetFormProps) => {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
+      // DEBUG: Log the current date
+      const now = new Date();
+      console.log("Current date:", now);
+      console.log("Current date string:", now.toString());
+      console.log("Timezone offset:", now.getTimezoneOffset());
+
+      // FIX: Create date in local timezone to avoid timezone issues
+      const registrationDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+
+      console.log("Registration date being set:", registrationDate);
+
       const streetData = {
+        id: Date.now(),
         ...formData,
-        registrationDate: new Date().toISOString().split("T")[0],
+        registrationDate,
       };
 
       onSubmit(streetData);
@@ -178,7 +244,20 @@ export const StreetForm = ({ onClose, onSubmit }: StreetFormProps) => {
               <Label className="leading-tight" htmlFor="cda">
                 Community Development Association *
               </Label>
-              <Input id="cda" placeholder="Enter CDA" value={formData.cda} onChange={(e) => handleInputChange("cda", e.target.value)} required />
+              <Select value={formData.cda} onValueChange={(value) => handleInputChange("cda", value)} disabled={!formData.ward}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select CDA" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cdas
+                    .filter((cda) => cda.ward === formData.ward)
+                    .map((cda) => (
+                      <SelectItem key={cda.id} value={cda.name}>
+                        {cda.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

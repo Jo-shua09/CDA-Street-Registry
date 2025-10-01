@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,67 +21,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-// Minimal mock data - 1 example street with properties
-const mockStreetData = {
-  1: {
-    id: 1,
-    name: "Ahmadu Bello Avenue",
-    cda: "Phase 1 CDA",
-    ward: "Ward C1",
-    lg: "Lagos Island LGA",
-    lcda: "Victoria Island LCDA",
-    registrationDate: "2023-03-15",
-    description: "Main commercial avenue with mixed residential and commercial properties.",
-    ownerName: "Community Development Association",
-    ownerContact: "+234 803 123 4567",
-    image: undefined,
-    propertyCount: {
-      houses: 2,
-      shops: 1,
-      hotels: 1,
-      others: 0,
-    },
-    properties: [
-      {
-        id: 1,
-        number: "15A",
-        type: "House",
-        owner: "John Adebayo",
-        contact: "+234 803 123 4567",
-        description: "3-bedroom duplex with modern amenities",
-        registrationDate: "2023-03-20",
-        hasShops: true,
-        shopCount: 1,
-        shops: [
-          {
-            number: "S1",
-            type: "Retail",
-            description: "Electronics shop",
-          },
-        ],
-      },
-      {
-        id: 3,
-        number: "22C",
-        type: "Hotel",
-        owner: "David Wilson",
-        contact: "+234 803 456 7890",
-        description: "4-star hotel with conference facilities",
-        registrationDate: "2023-05-10",
-      },
-      {
-        id: 4,
-        number: "25D",
-        type: "House",
-        owner: "Sarah Brown",
-        contact: "+234 803 234 5678",
-        description: "2-bedroom bungalow with garden",
-        registrationDate: "2023-06-05",
-      },
-    ],
-  },
-};
+import {
+  getStoredStreets,
+  getStoredProperties,
+  saveStreet,
+  saveProperty,
+  deleteProperty,
+  deleteStreet,
+  convertPropertyForDisplay,
+} from "@/utils/storage";
+import { ExtendedStreetData } from "@/data/types"; // Change this import
 
 const StreetDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -92,10 +41,48 @@ const StreetDetails = () => {
   const [showStreetEditForm, setShowStreetEditForm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [street, setStreet] = useState<ExtendedStreetData | null>(null);
+  const [properties, setProperties] = useState<any[]>([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const streetId = parseInt(id || "1");
-  const street = mockStreetData[streetId as keyof typeof mockStreetData];
-  const [properties, setProperties] = useState(street.properties);
+  const streetId = parseInt(id || "0");
+
+  // Load street and properties data from storage
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const storedStreets = getStoredStreets();
+        const foundStreet = storedStreets.find((s) => s.id === streetId);
+        if (foundStreet) {
+          setStreet(foundStreet);
+          const storedProperties = getStoredProperties(streetId);
+          // Convert stored properties to display format (base64 to File objects)
+          const displayProperties = storedProperties.map((prop) => convertPropertyForDisplay(prop)).filter(Boolean);
+          setProperties(displayProperties);
+        }
+      } catch (error) {
+        console.error("Error loading street and properties data:", error);
+      }
+    };
+
+    loadData();
+  }, [streetId, refreshTrigger]);
+
+  // Update street property count when properties change
+  useEffect(() => {
+    if (street && properties.length >= 0) {
+      const count = calculatePropertyCount();
+      const updatedStreet = { ...street, propertyCount: count };
+      saveStreet(updatedStreet);
+      setStreet(updatedStreet);
+    }
+  }, [properties, street?.id]);
+
+  // Property type categories for counting
+  const houseTypes = ["House", "Single-Family Home", "Multi-Family Home", "Townhouse", "Mansion / Villa", "Manufactured / Mobile Home", "Cottage"];
+  const shopTypes = ["Shop", "Restaurant / Café", "Shopping Mall / Plaza", "Gas Station"];
+  const hotelTypes = ["Hotel"];
 
   // Calculate dynamic property counts including aggregated shops
   const calculatePropertyCount = () => {
@@ -105,15 +92,15 @@ const StreetDetails = () => {
     let others = 0;
 
     properties.forEach((property) => {
-      const typeLower = property.type.toLowerCase();
-      if (typeLower === "house") {
+      const propertyType = property.type;
+      if (houseTypes.includes(propertyType)) {
         houses += 1;
         if (property.hasShops) {
           shops += property.shopCount || 0;
         }
-      } else if (typeLower === "shop") {
+      } else if (shopTypes.includes(propertyType)) {
         shops += 1;
-      } else if (typeLower === "hotel") {
+      } else if (hotelTypes.includes(propertyType)) {
         hotels += 1;
       } else {
         others += 1;
@@ -146,37 +133,14 @@ const StreetDetails = () => {
   const handlePropertySubmit = (propertyData: any) => {
     if (editingProperty) {
       // Update existing property
-      setProperties(properties.map((p) => (p.id === editingProperty.id ? { ...propertyData, id: editingProperty.id } : p)));
+      const updatedProperty = { ...propertyData, id: editingProperty.id };
+      saveProperty(updatedProperty);
     } else {
-      if (propertyData.type.toLowerCase() === "shop") {
-        // Find house with matching number
-        const houseIndex = properties.findIndex((p) => p.number === propertyData.houseNumber && p.type.toLowerCase() === "house");
-        if (houseIndex !== -1) {
-          const house = properties[houseIndex];
-          const updatedHouse = {
-            ...house,
-            hasShops: true,
-            shopCount: (house.shopCount || 0) + 1,
-            shops: [
-              ...(house.shops || []),
-              {
-                number: propertyData.number,
-                type: propertyData.type,
-                description: propertyData.description,
-              },
-            ],
-          };
-          setProperties(properties.map((p, i) => (i === houseIndex ? updatedHouse : p)));
-        } else {
-          // House not found, perhaps show error, but for now, do nothing
-          console.log("House not found for shop");
-        }
-      } else {
-        // Add new property
-        const newProperty = { ...propertyData, id: Date.now() };
-        setProperties([...properties, newProperty]);
-      }
+      // Add new property
+      const newProperty = { ...propertyData, id: Date.now(), streetId };
+      saveProperty(newProperty);
     }
+    setRefreshTrigger((prev) => prev + 1);
     setShowPropertyForm(false);
     setEditingProperty(null);
   };
@@ -191,7 +155,8 @@ const StreetDetails = () => {
   };
 
   const handleDeleteProperty = (propertyId: number) => {
-    setProperties(properties.filter((p) => p.id !== propertyId));
+    deleteProperty(propertyId);
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   const handleEditStreet = () => {
@@ -199,15 +164,10 @@ const StreetDetails = () => {
   };
 
   const handleStreetSubmit = (streetData: any) => {
-    console.log("Updating street:", streetData);
-    // Here you would typically make an API call to update the street
-    // For now, update the local mock data
-    if (mockStreetData[streetId as keyof typeof mockStreetData]) {
-      mockStreetData[streetId as keyof typeof mockStreetData] = {
-        ...mockStreetData[streetId as keyof typeof mockStreetData],
-        ...streetData,
-      };
-    }
+    const updatedStreet = { ...street, ...streetData };
+    saveStreet(updatedStreet);
+    setRefreshTrigger((prev) => prev + 1);
+    setShowStreetEditForm(false);
   };
 
   const handleDeleteStreet = () => {
@@ -215,14 +175,12 @@ const StreetDetails = () => {
   };
 
   const confirmDeleteStreet = () => {
-    console.log("Deleting street:", street.id);
-    // Here you would typically make an API call to delete the street
-    // Then navigate back to dashboard
+    deleteStreet(street.id);
     setShowDeleteConfirm(false);
     navigate("/dashboard");
   };
 
-  // Property types list for search filtering
+  // Property types list for search filtering and categorization
   const propertyTypes = [
     "House",
     "Shop",
@@ -300,8 +258,6 @@ const StreetDetails = () => {
 
   const filteredProperties = getFilteredProperties();
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
   const propertiesPerPage = 30;
 
   // Calculate paginated properties
@@ -434,26 +390,12 @@ const StreetDetails = () => {
                     <div className="relative">
                       <img src={street.image} alt={`${street.name} street view`} className="w-full h-96 object-cover rounded-lg border" />
                     </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        <Eye className="h-4 w-4 mr-2" />
-                        View Full Size
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Change Image
-                      </Button>
-                    </div>
                   </div>
                 ) : (
                   <div className="text-center py-12">
                     <Image className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-foreground mb-2">No Image Available</h3>
                     <p className="text-muted-foreground mb-4">No street image has been uploaded for {street.name} yet.</p>
-                    <Button variant="outline">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Upload Image
-                    </Button>
                   </div>
                 )}
               </CardContent>

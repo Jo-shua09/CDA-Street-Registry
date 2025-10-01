@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,7 +6,8 @@ import { ChevronRight, Building, MapPin, Home, Printer, ChevronDown, LogOut, Plu
 import { StreetForm } from "@/components/street/StreetForm";
 import { CdaForm } from "@/components/dashboard/CdaForm";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { mockStreets, mockCDAs } from "@/data/mockData";
+import { ExtendedCdaData, ExtendedStreetData } from "@/data/types";
+import { getStoredCDAs, getStoredStreets, saveCDA, saveStreet } from "@/utils/storage";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -17,9 +18,14 @@ interface WardStats {
 
 interface StreetFormData {
   name: string;
-  ward: string;
   cda: string;
+  ward: string;
+  lg: string;
+  lcda: string;
   description: string;
+  ownerName: string;
+  ownerContact: string;
+  image?: File | string;
   registrationDate: string;
 }
 
@@ -29,25 +35,57 @@ interface CdaFormData {
   lg: string;
   description: string;
   registrationDate: string;
+  chairman?: {
+    name: string;
+    contact: string;
+  };
 }
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [showStreetForm, setShowStreetForm] = useState(false);
   const [showCdaForm, setShowCdaForm] = useState(false);
+  const [cdas, setCdas] = useState<ExtendedCdaData[]>([]);
+  const [streets, setStreets] = useState<ExtendedStreetData[]>([]);
+  const [properties, setProperties] = useState<any[]>([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const logoUrl = "./logo.png";
 
-  // Generate wards data dynamically from mockCDAs
-  const wardsData: WardStats[] = mockCDAs.reduce((acc, cda) => {
-    const existing = acc.find((w) => w.name === cda.ward);
-    if (existing) {
-      existing.cdaCount++;
-    } else {
-      acc.push({ name: cda.ward, cdaCount: 1 });
+  // Static wards data - hardcoded as requested
+  const staticWards = ["Ward C1", "Ward C2", "Ward C3", "Ward C4", "Ward C5", "Ward C6"];
+
+  // Load data from localStorage on component mount and when refreshTrigger changes
+  useEffect(() => {
+    const loadData = () => {
+      const storedCDAs = getStoredCDAs();
+      const storedStreets = getStoredStreets();
+
+      setCdas(storedCDAs);
+      setStreets(storedStreets);
+    };
+
+    loadData();
+  }, [refreshTrigger]);
+
+  // Generate wards data with stats for each static ward
+  const wardsData: WardStats[] = staticWards.map((wardName) => {
+    const wardCDAs = cdas.filter((cda) => cda.ward === wardName);
+    return {
+      name: wardName,
+      cdaCount: wardCDAs.length,
+    };
+  });
+
+  // Calculate total streets and properties dynamically from stored data
+  const totalStreets = streets.length;
+  const totalProperties = streets.reduce((sum, street) => {
+    const pc = street.propertyCount;
+    if (typeof pc === "object" && pc !== null) {
+      return sum + (pc.houses || 0) + (pc.shops || 0) + (pc.hotels || 0) + (pc.others || 0);
     }
-    return acc;
-  }, [] as WardStats[]);
+    return sum;
+  }, 0);
 
   const handleLogout = () => {
     navigate("/");
@@ -65,13 +103,60 @@ const Dashboard = () => {
     setShowCdaForm(true);
   };
 
-  const handleStreetSubmit = (streetData: StreetFormData & { registrationDate: string }) => {
-    console.log("Street submitted:", streetData);
+  const handleStreetSubmit = async (streetData: StreetFormData & { registrationDate: string }) => {
+    let imageUrl: string | undefined;
+
+    // Convert image file to data URL if present
+    if (streetData.image && typeof streetData.image !== "string") {
+      imageUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.readAsDataURL(streetData.image as Blob);
+      });
+    }
+
+    // Use registrationDate from form data directly without overriding
+    const registrationDate = streetData.registrationDate;
+    console.log("Dashboard - Registration date being saved:", registrationDate);
+
+    const newStreet: ExtendedStreetData = {
+      id: Date.now(),
+      name: streetData.name,
+      ward: streetData.ward,
+      cda: streetData.cda,
+      lg: streetData.lg,
+      lcda: streetData.lcda,
+      registrationDate: registrationDate,
+      description: streetData.description,
+      ownerName: streetData.ownerName || "",
+      ownerContact: streetData.ownerContact || "",
+      image: imageUrl,
+      propertyCount: { houses: 0, shops: 0, hotels: 0, others: 0 },
+      properties: [],
+    };
+
+    console.log("Dashboard - Street being saved:", newStreet);
+
+    saveStreet(newStreet);
+    setRefreshTrigger((prev) => prev + 1);
     setShowStreetForm(false);
   };
 
   const handleCdaSubmit = (cdaData: CdaFormData & { registrationDate: string }) => {
-    console.log("CDA submitted:", cdaData);
+    const newCDA: ExtendedCdaData = {
+      id: Date.now(),
+      name: cdaData.name,
+      ward: cdaData.ward,
+      lg: cdaData.lg || "",
+      registrationDate: cdaData.registrationDate,
+      description: cdaData.description,
+      chairman: cdaData.chairman,
+      streetCount: 0,
+      propertyCount: 0,
+    };
+
+    saveCDA(newCDA);
+    setRefreshTrigger((prev) => prev + 1);
     setShowCdaForm(false);
   };
 
@@ -113,14 +198,14 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              ${mockCDAs
+              ${cdas
                 .map(
                   (cda, index) => `
                 <tr>
                   <td>${index + 1}</td>
                   <td>${cda.name}</td>
                   <td>${cda.ward}</td>
-                  <td>${cda.lg || "Igbogbo/Baiyeku LCDA"}</td>
+                  <td>Igbogbo/Baiyeku LCDA</td>
                   <td>${cda.streetCount}</td>
                   <td>${cda.propertyCount}</td>
                   <td>${cda.registrationDate || "N/A"}</td>
@@ -133,9 +218,9 @@ const Dashboard = () => {
 
           <div class="summary">
             <h3>Summary</h3>
-            <p><strong>Total CDAs:</strong> ${mockCDAs.length}</p>
-            <p><strong>Total Streets:</strong> ${mockCDAs.reduce((sum, cda) => sum + cda.streetCount, 0)}</p>
-            <p><strong>Total Properties:</strong> ${mockCDAs.reduce((sum, cda) => sum + cda.propertyCount, 0)}</p>
+            <p><strong>Total CDAs:</strong> ${cdas.length}</p>
+            <p><strong>Total Streets:</strong> ${cdas.reduce((sum, cda) => sum + cda.streetCount, 0)}</p>
+            <p><strong>Total Properties:</strong> ${cdas.reduce((sum, cda) => sum + cda.propertyCount, 0)}</p>
           </div>
 
           <div class="footer">
@@ -184,15 +269,15 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              ${mockStreets
+              ${streets
                 .map(
                   (street, index) => `
                 <tr>
                   <td>${index + 1}</td>
                   <td>${street.name}</td>
                   <td>${street.ward}</td>
-                  <td>${street.cdaName || "Multiple CDAs"}</td>
-                  <td>${street.propertyCount}</td>
+                  <td>${street.cda || "Multiple CDAs"}</td>
+                  <td>${street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others}</td>
                   <td>${street.registrationDate || "N/A"}</td>
                 </tr>
               `
@@ -203,8 +288,12 @@ const Dashboard = () => {
 
           <div class="summary">
             <h3>Summary</h3>
-            <p><strong>Total Streets:</strong> ${mockStreets.length}</p>
-            <p><strong>Total Properties:</strong> ${mockStreets.reduce((sum, street) => sum + street.propertyCount, 0)}</p>
+            <p><strong>Total Streets:</strong> ${streets.length}</p>
+            <p><strong>Total Properties:</strong> ${streets.reduce(
+              (sum, street) =>
+                sum + (street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others),
+              0
+            )}</p>
           </div>
 
           <div class="footer">
@@ -373,7 +462,7 @@ const Dashboard = () => {
 
     // Add data rows
     pdf.setFontSize(10);
-    mockCDAs.forEach((cda, index) => {
+    cdas.forEach((cda, index) => {
       if (yPosition > 270) {
         pdf.addPage();
         yPosition = 20;
@@ -401,11 +490,11 @@ const Dashboard = () => {
     pdf.text("SUMMARY", 20, yPosition);
     yPosition += 8;
     pdf.setFontSize(10);
-    pdf.text(`Total CDAs: ${mockCDAs.length}`, 20, yPosition);
+    pdf.text(`Total CDAs: ${cdas.length}`, 20, yPosition);
     yPosition += 6;
-    pdf.text(`Total Streets: ${mockCDAs.reduce((sum, cda) => sum + cda.streetCount, 0)}`, 20, yPosition);
+    pdf.text(`Total Streets: ${cdas.reduce((sum, cda) => sum + cda.streetCount, 0)}`, 20, yPosition);
     yPosition += 6;
-    pdf.text(`Total Properties: ${mockCDAs.reduce((sum, cda) => sum + cda.propertyCount, 0)}`, 20, yPosition);
+    pdf.text(`Total Properties: ${cdas.reduce((sum, cda) => sum + cda.propertyCount, 0)}`, 20, yPosition);
 
     pdf.save(`cda-report-${new Date().toISOString().split("T")[0]}.pdf`);
   };
@@ -435,7 +524,7 @@ const Dashboard = () => {
 
     // Add data rows
     pdf.setFontSize(10);
-    mockStreets.forEach((street, index) => {
+    streets.forEach((street, index) => {
       if (yPosition > 270) {
         pdf.addPage();
         yPosition = 20;
@@ -445,8 +534,8 @@ const Dashboard = () => {
         (index + 1).toString(),
         street.name.substring(0, 15),
         street.ward.substring(0, 10),
-        (street.cdaName || "Multiple").substring(0, 12),
-        street.propertyCount.toString(),
+        (street.cda || "Multiple").substring(0, 12),
+        (street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others).toString(),
         (street.registrationDate || "N/A").substring(0, 8),
       ];
 
@@ -463,9 +552,16 @@ const Dashboard = () => {
     pdf.text("SUMMARY", 20, yPosition);
     yPosition += 8;
     pdf.setFontSize(10);
-    pdf.text(`Total Streets: ${mockStreets.length}`, 20, yPosition);
+    pdf.text(`Total Streets: ${streets.length}`, 20, yPosition);
     yPosition += 6;
-    pdf.text(`Total Properties: ${mockStreets.reduce((sum, street) => sum + street.propertyCount, 0)}`, 20, yPosition);
+    pdf.text(
+      `Total Properties: ${streets.reduce(
+        (sum, street) => sum + (street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others),
+        0
+      )}`,
+      20,
+      yPosition
+    );
 
     pdf.save(`streets-report-${new Date().toISOString().split("T")[0]}.pdf`);
   };
@@ -522,7 +618,6 @@ const Dashboard = () => {
         </div>
       </header>
 
-      {/* Rest of the component remains the same */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Welcome Section */}
         <div className="mb-8">
@@ -563,7 +658,7 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total CDAs</p>
-                    <p className="text-2xl font-bold text-foreground">{mockCDAs.length}</p>
+                    <p className="text-2xl font-bold text-foreground">{cdas.length}</p>
                   </div>
                 </div>
               </CardContent>
@@ -577,7 +672,7 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total Streets</p>
-                    <p className="text-2xl font-bold text-foreground">{mockCDAs.reduce((sum, cda) => sum + cda.streetCount, 0)}</p>
+                    <p className="text-2xl font-bold text-foreground">{totalStreets}</p>
                   </div>
                 </div>
               </CardContent>
@@ -591,7 +686,7 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total Properties</p>
-                    <p className="text-2xl font-bold text-foreground">{mockCDAs.reduce((sum, cda) => sum + cda.propertyCount, 0)}</p>
+                    <p className="text-2xl font-bold text-foreground">{totalProperties}</p>
                   </div>
                 </div>
               </CardContent>
@@ -606,28 +701,36 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {wardsData.map((ward) => {
-              // Calculate aggregated stats for this ward
-              const wardCDAs = mockCDAs.filter((cda) => cda.ward === ward.name);
-              const totalStreets = wardCDAs.reduce((sum, cda) => sum + cda.streetCount, 0);
-              const totalProperties = wardCDAs.reduce((sum, cda) => sum + cda.propertyCount, 0);
+            {staticWards.map((wardName) => {
+              // Calculate aggregated stats for this ward from actual data
+              const wardCDAs = cdas.filter((cda) => cda.ward === wardName);
+              const totalStreets = streets.filter((s) => s.ward === wardName).length;
+              const totalProperties = streets
+                .filter((s) => s.ward === wardName)
+                .reduce((sum, s) => {
+                  const pc = s.propertyCount;
+                  if (typeof pc === "object" && pc !== null) {
+                    return sum + (pc.houses || 0) + (pc.shops || 0) + (pc.hotels || 0) + (pc.others || 0);
+                  }
+                  return sum;
+                }, 0);
 
               return (
                 <Card
-                  key={ward.name}
+                  key={wardName}
                   className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
-                  onClick={() => handleNavigateToWard(ward.name)}
+                  onClick={() => handleNavigateToWard(wardName)}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-lg font-semibold text-foreground">{ward.name}</h4>
+                      <h4 className="text-lg font-semibold text-foreground">{wardName}</h4>
                       <ChevronRight className="h-5 w-5 text-muted-foreground" />
                     </div>
 
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-muted-foreground">CDAs</span>
-                        <span className="font-semibold">{ward.cdaCount}</span>
+                        <span className="font-semibold">{wardCDAs.length}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-muted-foreground">Total Streets</span>
@@ -653,7 +756,7 @@ const Dashboard = () => {
       </div>
 
       {/* Street Form Modal */}
-      {showStreetForm && <StreetForm onClose={() => setShowStreetForm(false)} onSubmit={handleStreetSubmit} />}
+      {showStreetForm && <StreetForm onClose={() => setShowStreetForm(false)} onSubmit={handleStreetSubmit} cdas={cdas} />}
 
       {/* CDA Form Modal */}
       {showCdaForm && <CdaForm onClose={() => setShowCdaForm(false)} onSubmit={handleCdaSubmit} />}

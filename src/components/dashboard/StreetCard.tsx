@@ -10,7 +10,7 @@ interface StreetCardProps {
     id: number;
     name: string;
     cda: string;
-    state: string;
+    ward: string;
     lg: string;
     lcda: string;
     propertyCount: {
@@ -21,6 +21,7 @@ interface StreetCardProps {
     };
     registrationDate: string;
     description: string;
+    image?: string;
   };
 }
 
@@ -46,15 +47,21 @@ export const StreetCard = ({ street }: StreetCardProps) => {
           {/* Main Content */}
           <div className="flex-1 min-w-0" onClick={handleViewStreet}>
             <div className="flex items-start gap-3 mb-3">
-              <div className="bg-primary-light p-3 rounded-lg mt-1">
-                <MapPin className="h-6 w-6 text-primary" />
-              </div>
+              {street.image ? (
+                <div className="w-12 h-12 rounded-lg overflow-hidden mt-1">
+                  <img src={street.image} alt={`${street.name} street view`} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="bg-primary-light p-3 rounded-lg mt-1">
+                  <MapPin className="h-6 w-6 text-primary" />
+                </div>
+              )}
 
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">{street.name}</h3>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <Badge variant="outline" className="text-xs">
-                    {street.state}
+                    {street.ward}
                   </Badge>
                   <Badge variant="outline" className="text-xs">
                     {street.lg}

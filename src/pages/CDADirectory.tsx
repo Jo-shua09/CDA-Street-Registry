@@ -3,12 +3,16 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Filter, MapPin, Home, X, Building, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
+import { Search, Filter, MapPin, Home, X, Building, ChevronLeft, ChevronRight, ArrowLeft, Plus, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { FilterPanel } from "@/components/dashboard/FilterPanel";
 import { CdaCard } from "@/components/dashboard/CdaCard";
 import { CdaEditForm } from "@/components/dashboard/CdaEditForm";
 import { StreetEditForm } from "@/components/street/StreetEditForm";
-import { extendedMockCDAs, extendedMockStreets, ExtendedCdaData, ExtendedStreetData } from "@/data/mockData";
+import { StreetForm } from "@/components/street/StreetForm";
+import { CdaForm } from "@/components/dashboard/CdaForm";
+import { ExtendedCdaData, ExtendedStreetData } from "@/data/types";
+import { getStoredCDAs, getStoredStreets, saveCDA, saveStreet, deleteCDA, deleteStreet } from "@/utils/storage";
 
 interface Street {
   id: number;
@@ -20,25 +24,13 @@ interface Street {
   registrationDate: string;
   description: string;
   properties: Array<{ type: string }>;
-  propertyCount: {
+  propertyCount?: {
     houses: number;
     shops: number;
     hotels: number;
     others: number;
   };
 }
-
-// Group streets by ward, then by CDA
-const groupedData = extendedMockStreets.reduce((acc, street) => {
-  if (!acc[street.ward]) {
-    acc[street.ward] = {};
-  }
-  if (!acc[street.ward][street.cda]) {
-    acc[street.ward][street.cda] = [];
-  }
-  acc[street.ward][street.cda].push(street);
-  return acc;
-}, {} as Record<string, Record<string, ExtendedStreetData[]>>);
 
 const CDADirectory = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -56,8 +48,38 @@ const CDADirectory = () => {
   const [deletingType, setDeletingType] = useState<"cda" | "street" | null>(null);
   const [showCdaEditForm, setShowCdaEditForm] = useState(false);
   const [showStreetEditForm, setShowStreetEditForm] = useState(false);
+  const [showStreetForm, setShowStreetForm] = useState(false);
+  const [showCdaForm, setShowCdaForm] = useState(false);
   const [editingCda, setEditingCda] = useState<ExtendedCdaData | null>(null);
   const [editingStreet, setEditingStreet] = useState<ExtendedStreetData | null>(null);
+  const [cdas, setCdas] = useState<ExtendedCdaData[]>([]);
+  const [streets, setStreets] = useState<ExtendedStreetData[]>([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Safe function to get property count with defaults
+  const getPropertyCount = (street: ExtendedStreetData) => {
+    if (!street.propertyCount) {
+      return { houses: 0, shops: 0, hotels: 0, others: 0 };
+    }
+    return {
+      houses: street.propertyCount.houses || 0,
+      shops: street.propertyCount.shops || 0,
+      hotels: street.propertyCount.hotels || 0,
+      others: street.propertyCount.others || 0,
+    };
+  };
+
+  // Group streets by ward, then by CDA
+  const groupedData = streets.reduce((acc, street) => {
+    if (!acc[street.ward]) {
+      acc[street.ward] = {};
+    }
+    if (!acc[street.ward][street.cda]) {
+      acc[street.ward][street.cda] = [];
+    }
+    acc[street.ward][street.cda].push(street);
+    return acc;
+  }, {} as Record<string, Record<string, ExtendedStreetData[]>>);
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -72,6 +94,14 @@ const CDADirectory = () => {
     setCurrentPage(1);
   }, [searchParams, selectedFilters, searchTerm]);
 
+  // Load data from storage
+  useEffect(() => {
+    const loadedCdas = getStoredCDAs();
+    const loadedStreets = getStoredStreets();
+    setCdas(loadedCdas);
+    setStreets(loadedStreets);
+  }, [refreshTrigger]);
+
   // Reset filters when ward changes
   useEffect(() => {
     setSelectedFilters({
@@ -83,18 +113,18 @@ const CDADirectory = () => {
   }, [selectedWard]);
 
   // Get unique wards sorted
-  const wards = Array.from(new Set(extendedMockCDAs.map((cda) => cda.ward))).sort();
+  const wards = Array.from(new Set(cdas.map((cda) => cda.ward))).sort();
 
   // Filter CDAs based on search, filters, and selected ward
-  const filteredCdas = extendedMockCDAs.filter((cda) => {
+  const filteredCdas = cdas.filter((cda) => {
     if (selectedWard && cda.ward !== selectedWard) {
       return false; // Only show CDAs of the selected ward
     }
 
-    const streets = groupedData[cda.ward]?.[cda.name] || [];
+    const streetsInCda = groupedData[cda.ward]?.[cda.name] || [];
 
     // Filter streets by registration date range
-    const filteredStreetsByDate = streets.filter((street) => {
+    const filteredStreetsByDate = streetsInCda.filter((street) => {
       const streetDate = new Date(street.registrationDate);
       const startDate = selectedFilters.dateRange.start ? new Date(selectedFilters.dateRange.start) : null;
       const endDate = selectedFilters.dateRange.end ? new Date(selectedFilters.dateRange.end) : null;
@@ -104,8 +134,8 @@ const CDADirectory = () => {
       return true;
     });
 
-    // If no streets after date filter, exclude this CDA
-    if (filteredStreetsByDate.length === 0) {
+    // If no streets after date filter and not viewing a specific ward, exclude this CDA
+    if (!selectedWard && filteredStreetsByDate.length === 0) {
       return false;
     }
 
@@ -116,8 +146,10 @@ const CDADirectory = () => {
 
     const matchesCDA = selectedFilters.cda.length === 0 || selectedFilters.cda.includes(cda.name);
 
+    // FIXED: Use safe property count function
     const totalProperties = filteredStreetsByDate.reduce((sum, street) => {
-      return sum + street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others;
+      const propertyCount = getPropertyCount(street);
+      return sum + propertyCount.houses + propertyCount.shops + propertyCount.hotels + propertyCount.others;
     }, 0);
 
     const matchesPropertyCount = totalProperties >= selectedFilters.propertyRange.min && totalProperties <= selectedFilters.propertyRange.max;
@@ -134,6 +166,31 @@ const CDADirectory = () => {
     navigate("/dashboard");
   };
 
+  const handleRegisterStreet = () => {
+    setShowStreetForm(true);
+  };
+
+  const handleRegisterCda = () => {
+    setShowCdaForm(true);
+  };
+
+  const handleStreetFormSubmit = (streetData: ExtendedStreetData) => {
+    // Ensure the street has proper propertyCount structure
+    const streetWithDefaults = {
+      ...streetData,
+      propertyCount: streetData.propertyCount || { houses: 0, shops: 0, hotels: 0, others: 0 },
+    };
+    saveStreet(streetWithDefaults);
+    setRefreshTrigger((prev) => prev + 1);
+    setShowStreetForm(false);
+  };
+
+  const handleCdaFormSubmit = (cdaData: ExtendedCdaData) => {
+    saveCDA(cdaData);
+    setRefreshTrigger((prev) => prev + 1);
+    setShowCdaForm(false);
+  };
+
   const handleStreetClick = (streetId: number) => {
     navigate(`/street/${streetId}`);
   };
@@ -144,13 +201,8 @@ const CDADirectory = () => {
   };
 
   const handleCdaEditSubmit = (updatedCda: ExtendedCdaData) => {
-    const index = extendedMockCDAs.findIndex((cda) => cda.id === updatedCda.id);
-    if (index !== -1) {
-      extendedMockCDAs[index] = {
-        ...extendedMockCDAs[index],
-        ...updatedCda,
-      };
-    }
+    saveCDA(updatedCda);
+    setRefreshTrigger((prev) => prev + 1);
     setShowCdaEditForm(false);
     setEditingCda(null);
   };
@@ -167,10 +219,13 @@ const CDADirectory = () => {
   };
 
   const handleStreetEditSubmit = (updatedStreet: ExtendedStreetData) => {
-    const index = extendedMockStreets.findIndex((s) => s.id === updatedStreet.id);
-    if (index !== -1) {
-      extendedMockStreets[index] = updatedStreet;
-    }
+    // Ensure the street has proper propertyCount structure
+    const streetWithDefaults = {
+      ...updatedStreet,
+      propertyCount: updatedStreet.propertyCount || { houses: 0, shops: 0, hotels: 0, others: 0 },
+    };
+    saveStreet(streetWithDefaults);
+    setRefreshTrigger((prev) => prev + 1);
     setShowStreetEditForm(false);
     setEditingStreet(null);
   };
@@ -183,16 +238,11 @@ const CDADirectory = () => {
 
   const confirmDelete = () => {
     if (deletingType === "cda" && deletingCdaId !== null) {
-      const index = extendedMockCDAs.findIndex((cda) => cda.id === deletingCdaId);
-      if (index !== -1) {
-        extendedMockCDAs.splice(index, 1);
-      }
+      deleteCDA(deletingCdaId);
     } else if (deletingType === "street" && deletingStreetId !== null) {
-      const index = extendedMockStreets.findIndex((street) => street.id === deletingStreetId);
-      if (index !== -1) {
-        extendedMockStreets.splice(index, 1);
-      }
+      deleteStreet(deletingStreetId);
     }
+    setRefreshTrigger((prev) => prev + 1);
     setShowDeleteConfirm(false);
     setDeletingCdaId(null);
     setDeletingStreetId(null);
@@ -216,6 +266,14 @@ const CDADirectory = () => {
     }
   };
 
+  // Calculate total properties for stats cards - FIXED
+  const calculateTotalProperties = (streetsList: ExtendedStreetData[]) => {
+    return streetsList.reduce((sum, street) => {
+      const propertyCount = getPropertyCount(street);
+      return sum + propertyCount.houses + propertyCount.shops + propertyCount.hotels + propertyCount.others;
+    }, 0);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -228,6 +286,27 @@ const CDADirectory = () => {
                 <h1 className="text-sm sm:text-lg font-semibold text-foreground">CDA Directory</h1>
                 <p className="text-xs sm:text-sm text-muted-foreground">Street & Property Management</p>
               </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="default" size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Register
+                    <ChevronDown className="h-4 w-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleRegisterCda}>
+                    <Building className="h-4 w-4 mr-2" />
+                    Register CDA
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleRegisterStreet}>
+                    <MapPin className="h-4 w-4 mr-2" />
+                    Register Street
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
@@ -298,7 +377,7 @@ const CDADirectory = () => {
                             const streets = groupedData[cda.ward]?.[cda.name] || [];
                             return sum + streets.length;
                           }, 0)
-                        : extendedMockStreets.length}
+                        : streets.length}
                     </p>
                   </div>
                 </div>
@@ -317,24 +396,9 @@ const CDADirectory = () => {
                       {selectedWard
                         ? filteredCdas.reduce((sum, cda) => {
                             const streets = groupedData[cda.ward]?.[cda.name] || [];
-                            return (
-                              sum +
-                              streets.reduce((streetSum, street) => {
-                                return (
-                                  streetSum +
-                                  street.propertyCount.houses +
-                                  street.propertyCount.shops +
-                                  street.propertyCount.hotels +
-                                  street.propertyCount.others
-                                );
-                              }, 0)
-                            );
+                            return sum + calculateTotalProperties(streets);
                           }, 0)
-                        : extendedMockStreets.reduce((sum, street) => {
-                            const total =
-                              street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others;
-                            return sum + total;
-                          }, 0)}
+                        : calculateTotalProperties(streets)}
                     </p>
                   </div>
                 </div>
@@ -379,7 +443,7 @@ const CDADirectory = () => {
               <FilterPanel
                 filters={{ ...selectedFilters, ward: selectedWard || undefined }}
                 onFiltersChange={setSelectedFilters}
-                streets={selectedWard ? extendedMockStreets.filter((street) => street.ward === selectedWard) : extendedMockStreets}
+                streets={selectedWard ? streets.filter((street) => street.ward === selectedWard) : streets}
               />
             </div>
           )}
@@ -530,6 +594,12 @@ const CDADirectory = () => {
           onSubmit={handleStreetEditSubmit}
         />
       )}
+
+      {/* CDA Form Modal */}
+      {showCdaForm && <CdaForm onClose={() => setShowCdaForm(false)} onSubmit={handleCdaFormSubmit} />}
+
+      {/* Street Form Modal */}
+      {showStreetForm && <StreetForm onClose={() => setShowStreetForm(false)} onSubmit={handleStreetFormSubmit} cdas={cdas} />}
     </div>
   );
 };

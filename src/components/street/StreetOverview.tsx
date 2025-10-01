@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Home, Calendar, Building, Store, Hotel, Edit, Users } from "lucide-react";
 
 interface StreetOverviewProps {
-  handleEditStreet: any;
+  handleEditStreet: () => void;
   street: {
     id: number;
     name: string;
@@ -17,7 +17,7 @@ interface StreetOverviewProps {
     image?: string;
     ownerName?: string;
     ownerContact?: string;
-    properties: Array<{ type: string }>;
+    properties?: Array<{ type: string }>; // Made optional
     propertyCount?: {
       houses: number;
       shops: number;
@@ -29,26 +29,44 @@ interface StreetOverviewProps {
 
 export const StreetOverview = ({ street, handleEditStreet }: StreetOverviewProps) => {
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    // Ensure the date string is treated as local date, not UTC
+    const date = new Date(dateString + "T00:00:00");
+    return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
     });
   };
 
-  // Calculate property type statistics and total
-  const totalProperties = street.propertyCount
-    ? street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others
-    : street.properties.length;
+  // Safe function to get property count with defaults
+  const getPropertyCount = () => {
+    if (street.propertyCount) {
+      return street.propertyCount;
+    }
+    return { houses: 0, shops: 0, hotels: 0, others: 0 };
+  };
 
-  const propertyStats = street.propertyCount
+  // Safe function to get properties array
+  const getProperties = () => {
+    return street.properties || [];
+  };
+
+  // Calculate property type statistics and total - FIXED
+  const propertyCount = getPropertyCount();
+  const properties = getProperties();
+
+  const totalProperties = propertyCount
+    ? propertyCount.houses + propertyCount.shops + propertyCount.hotels + propertyCount.others
+    : properties.length;
+
+  const propertyStats = propertyCount
     ? {
-        Houses: street.propertyCount.houses,
-        Shops: street.propertyCount.shops,
-        Hotels: street.propertyCount.hotels,
-        Others: street.propertyCount.others,
+        Houses: propertyCount.houses,
+        Shops: propertyCount.shops,
+        Hotels: propertyCount.hotels,
+        Others: propertyCount.others,
       }
-    : street.properties.reduce((acc, property) => {
+    : properties.reduce((acc, property) => {
         acc[property.type] = (acc[property.type] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
@@ -67,7 +85,7 @@ export const StreetOverview = ({ street, handleEditStreet }: StreetOverviewProps
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Main Street Information */}
       <div className="lg:col-span-2">
         <Card>
@@ -110,16 +128,16 @@ export const StreetOverview = ({ street, handleEditStreet }: StreetOverviewProps
                 <p className="text-foreground leading-relaxed">{street.description}</p>
               </div>
 
-              {(street.ownerName || street.ownerContact) && (
+              {((street.ownerName && street.ownerName.trim() !== "") || (street.ownerContact && street.ownerContact.trim() !== "")) && (
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground mb-2">Owner Information</h3>
                   <div className="space-y-1">
-                    {street.ownerName && (
+                    {street.ownerName && street.ownerName.trim() !== "" && (
                       <p className="text-foreground">
                         <span className="font-medium">Name:</span> {street.ownerName}
                       </p>
                     )}
-                    {street.ownerContact && (
+                    {street.ownerContact && street.ownerContact.trim() !== "" && (
                       <p className="text-foreground">
                         <span className="font-medium">Contact:</span> {street.ownerContact}
                       </p>
@@ -137,7 +155,7 @@ export const StreetOverview = ({ street, handleEditStreet }: StreetOverviewProps
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-border">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-border">
                 <div>
                   <h4 className="text-sm font-medium text-muted-foreground mb-1">Registration Date</h4>
                   <div className="flex items-center gap-2 text-foreground">
@@ -155,51 +173,6 @@ export const StreetOverview = ({ street, handleEditStreet }: StreetOverviewProps
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Property Statistics */}
-      <div className="space-y-4">
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Building className="h-4 w-4" />
-              Property Types
-            </h3>
-
-            {Object.keys(propertyStats).length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">No properties registered yet</p>
-            ) : (
-              <div className="space-y-3">
-                {Object.entries(propertyStats)
-                  .sort(([, a], [, b]) => b - a)
-                  .map(([type, count]) => {
-                    // const Icon = getPropertyIcon(type);
-                    const percentage = totalProperties > 0 ? (count / totalProperties) * 100 : 0;
-
-                    return (
-                      <div key={type} className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            {/* <Icon className="h-4 w-4 text-muted-foreground" /> */}
-                            <span className="font-medium text-foreground capitalize">{type}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">{count}</span>
-                            <Badge variant="secondary" className="text-xs">
-                              {percentage.toFixed(0)}%
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="w-full bg-muted rounded-full h-2">
-                          <div className="bg-primary h-2 rounded-full transition-all duration-300" style={{ width: `${percentage}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>

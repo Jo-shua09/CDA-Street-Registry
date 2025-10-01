@@ -65,7 +65,15 @@ export const getStoredStreets = (): ExtendedStreetData[] => {
     const stored = localStorage.getItem(STORAGE_KEYS.STREETS);
     if (!stored) return [];
     const streets = JSON.parse(stored);
-    return streets;
+    // Fix any corrupted or invalid registrationDate values
+    return streets.map((street: ExtendedStreetData) => {
+      if (!street.registrationDate || isNaN(Date.parse(street.registrationDate))) {
+        const today = new Date();
+        street.registrationDate =
+          today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
+      }
+      return street;
+    });
   } catch (error) {
     console.error("Error loading streets from localStorage:", error);
     return [];

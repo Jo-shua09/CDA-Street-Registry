@@ -11,6 +11,7 @@ import { Home, Store, Hotel, Building, Upload, X, FileImage, File, Image, Eye, D
 import { useToast } from "@/hooks/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { convertPropertyForStorage, StoredProperty } from "@/utils/storage";
 
 interface Property {
   id?: number;
@@ -35,7 +36,7 @@ interface Property {
 interface PropertyFormProps {
   property?: Property;
   streetName: string;
-  onSubmit: (data: Property) => void;
+  onSubmit: (data: StoredProperty) => void;
   onClose: () => void;
 }
 
@@ -206,7 +207,9 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
           : [],
       };
 
-      onSubmit(propertyData);
+      // Convert File objects to base64 for storage
+      const propertyForStorage = await convertPropertyForStorage(propertyData);
+      onSubmit(propertyForStorage);
 
       toast({
         title: property ? "Property Updated" : "Property Registered",

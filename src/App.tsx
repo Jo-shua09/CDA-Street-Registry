@@ -11,6 +11,7 @@ import CDADirectory from "./pages/CDADirectory";
 import StreetDetails from "./pages/StreetDetails";
 import NotFound from "./pages/NotFound";
 import Loader from "./components/Loader";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -36,7 +37,14 @@ const App = () => {
             <Route path="/" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/cda-directory" element={<CDADirectory />} />
-            <Route path="/street/:id" element={<StreetDetails />} />
+            <Route
+              path="/street/:id"
+              element={
+                <ErrorBoundary>
+                  <StreetDetails />
+                </ErrorBoundary>
+              }
+            />
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

@@ -6,6 +6,9 @@ import { ChevronRight, Building, MapPin, Home, Printer, ChevronDown, LogOut, Plu
 import { StreetForm } from "@/components/street/StreetForm";
 import { CdaForm } from "@/components/dashboard/CdaForm";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { mockStreets, mockCDAs } from "@/data/mockData";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface WardStats {
   name: string;
@@ -28,29 +31,12 @@ interface CdaFormData {
   registrationDate: string;
 }
 
-// Updated mock data for streets with CDA names
-const mockStreets = [
-  { id: 1, name: "Ahmadu Bello Avenue", ward: "Ward C1", cdaName: "Phase 1 CDA", propertyCount: 2 },
-  { id: 2, name: "Allen Avenue", ward: "Ward C2", cdaName: "Sunrise CDA", propertyCount: 2 },
-  { id: 3, name: "Palm Street", ward: "Ward C3", cdaName: "Palm Grove CDA", propertyCount: 2 },
-  { id: 4, name: "Royal Road", ward: "Ward C4", cdaName: "Royal Estate CDA", propertyCount: 2 },
-  { id: 5, name: "Mountain View", ward: "Ward C5", cdaName: "Mountain Top CDA", propertyCount: 2 },
-  { id: 6, name: "River Bank", ward: "Ward C6", cdaName: "River Side CDA", propertyCount: 2 },
-];
-
-const mockCDAs = [
-  { id: 1, name: "Phase 1 CDA", ward: "Ward C1", streetCount: 2, propertyCount: 1 },
-  { id: 2, name: "Sunrise CDA", ward: "Ward C2", streetCount: 3, propertyCount: 2 },
-  { id: 3, name: "Palm Grove CDA", ward: "Ward C3", streetCount: 4, propertyCount: 2 },
-  { id: 4, name: "Royal Estate CDA", ward: "Ward C4", streetCount: 1, propertyCount: 2 },
-  { id: 5, name: "Mountain Top CDA", ward: "Ward C5", streetCount: 2, propertyCount: 2 },
-  { id: 6, name: "River Side CDA", ward: "Ward C6", streetCount: 3, propertyCount: 2 },
-];
-
 const Dashboard = () => {
   const navigate = useNavigate();
   const [showStreetForm, setShowStreetForm] = useState(false);
   const [showCdaForm, setShowCdaForm] = useState(false);
+
+  const logoUrl = "./logo.png";
 
   // Generate wards data dynamically from mockCDAs
   const wardsData: WardStats[] = mockCDAs.reduce((acc, cda) => {
@@ -89,11 +75,8 @@ const Dashboard = () => {
     setShowCdaForm(false);
   };
 
-  const printCDAs = () => {
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
-
-    const html = `
+  const generateCDAReportHTML = () => {
+    return `
       <!DOCTYPE html>
       <html>
         <head>
@@ -105,13 +88,16 @@ const Dashboard = () => {
             th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
             th { background-color: #f2f2f2; font-weight: bold; }
             .header { text-align: center; margin-bottom: 30px; }
+            .header img { height: 80px; }
             .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #666; }
+            .summary { margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 5px; }
           </style>
         </head>
         <body>
           <div class="header">
-            <h1>Community Development Associations Report</h1>
-            <p>Generated on: ${new Date().toLocaleDateString()}</p>
+            <img src="${logoUrl}" alt="Logo" style="height: 80px; display: block; margin: 0 auto 10px;" />
+            <h1>Igbogbo/Baiyeku LCDA - CDA Report</h1>
+            <p style="color: #666;">Generated on: ${new Date().toLocaleDateString()}</p>
           </div>
 
           <table>
@@ -120,8 +106,10 @@ const Dashboard = () => {
                 <th>#</th>
                 <th>CDA Name</th>
                 <th>Ward</th>
+                <th>Local Government</th>
                 <th>Number of Streets</th>
-                <th>Total Properties</th>
+                <th>Number of Properties</th>
+                <th>Registration Date</th>
               </tr>
             </thead>
             <tbody>
@@ -132,8 +120,10 @@ const Dashboard = () => {
                   <td>${index + 1}</td>
                   <td>${cda.name}</td>
                   <td>${cda.ward}</td>
+                  <td>${cda.lg || "Igbogbo/Baiyeku LCDA"}</td>
                   <td>${cda.streetCount}</td>
                   <td>${cda.propertyCount}</td>
+                  <td>${cda.registrationDate || "N/A"}</td>
                 </tr>
               `
                 )
@@ -141,13 +131,96 @@ const Dashboard = () => {
             </tbody>
           </table>
 
+          <div class="summary">
+            <h3>Summary</h3>
+            <p><strong>Total CDAs:</strong> ${mockCDAs.length}</p>
+            <p><strong>Total Streets:</strong> ${mockCDAs.reduce((sum, cda) => sum + cda.streetCount, 0)}</p>
+            <p><strong>Total Properties:</strong> ${mockCDAs.reduce((sum, cda) => sum + cda.propertyCount, 0)}</p>
+          </div>
+
           <div class="footer">
-            <p>Total CDAs: ${mockCDAs.length}</p>
+            <p>Igbogbo/Baiyeku LCDA CDA Registry System</p>
+            <p>Page 1 of 1</p>
           </div>
         </body>
       </html>
     `;
+  };
 
+  const generateStreetsReportHTML = () => {
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Registered Streets Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { text-align: center; color: #333; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; font-weight: bold; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .header img { height: 80px; }
+            .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #666; }
+            .summary { margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <img src="${logoUrl}" alt="Logo" style="height: 80px; display: block; margin: 0 auto 10px;" />
+            <h1>Igbogbo/Baiyeku LCDA - Registered Streets Report</h1>
+            <p style="color: #666;">Generated on: ${new Date().toLocaleDateString()}</p>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Street Name</th>
+                <th>Ward</th>
+                <th>CDA Name</th>
+                <th>Number of Properties</th>
+                <th>Registration Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${mockStreets
+                .map(
+                  (street, index) => `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${street.name}</td>
+                  <td>${street.ward}</td>
+                  <td>${street.cdaName || "Multiple CDAs"}</td>
+                  <td>${street.propertyCount}</td>
+                  <td>${street.registrationDate || "N/A"}</td>
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+
+          <div class="summary">
+            <h3>Summary</h3>
+            <p><strong>Total Streets:</strong> ${mockStreets.length}</p>
+            <p><strong>Total Properties:</strong> ${mockStreets.reduce((sum, street) => sum + street.propertyCount, 0)}</p>
+          </div>
+
+          <div class="footer">
+            <p>Igbogbo/Baiyeku LCDA Street Registry System</p>
+            <p>Page 1 of 1</p>
+          </div>
+        </body>
+      </html>
+    `;
+  };
+
+  const printCDAs = () => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+
+    const html = generateCDAReportHTML();
     printWindow.document.write(html);
     printWindow.document.close();
     printWindow.print();
@@ -157,65 +230,244 @@ const Dashboard = () => {
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
 
-    const html = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>Registered Streets Report</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          h1 { text-align: center; color: #333; }
-          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-          th { background-color: #f2f2f2; font-weight: bold; }
-          .header { text-align: center; margin-bottom: 30px; }
-          .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #666; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>Registered Streets Report</h1>
-          <p>Generated on: ${new Date().toLocaleDateString()}</p>
-        </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Street Name</th>
-              <th>Ward</th>
-              <th>CDA Name</th>
-              <th>Number of Properties</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${mockStreets
-              .map(
-                (street, index) => `
-              <tr>
-                <td>${index + 1}</td>
-                <td>${street.name}</td>
-                <td>${street.ward}</td>
-                <td>${street.cdaName || "Multiple CDAs"}</td>
-                <td>${street.propertyCount}</td>
-              </tr>
-            `
-              )
-              .join("")}
-          </tbody>
-        </table>
-
-        <div class="footer">
-          <p>Total Streets: ${mockStreets.length}</p>
-          <p>Total Properties: ${mockStreets.reduce((sum, street) => sum + street.propertyCount, 0)}</p>
-        </div>
-      </body>
-    </html>
-  `;
-
+    const html = generateStreetsReportHTML();
     printWindow.document.write(html);
     printWindow.document.close();
     printWindow.print();
+  };
+
+  const downloadCDAs = async () => {
+    try {
+      // Create a temporary div to render the HTML
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = generateCDAReportHTML();
+      tempDiv.style.position = "absolute";
+      tempDiv.style.left = "-9999px";
+      tempDiv.style.width = "210mm"; // A4 width
+      document.body.appendChild(tempDiv);
+
+      // Convert to canvas then to PDF
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        width: tempDiv.scrollWidth,
+        height: tempDiv.scrollHeight,
+      });
+
+      // Remove temporary div
+      document.body.removeChild(tempDiv);
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 295; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // Add text watermark with 70% opacity centered
+      pdf.setFontSize(50);
+      pdf.setTextColor(200, 200, 200, 0.7);
+      pdf.text("Igbogbo/Baiyeku LCDA", 105, 148, { align: "center" });
+      pdf.setTextColor(0, 0, 0, 1);
+
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+
+        // Add text watermark on each page
+        pdf.setFontSize(50);
+        pdf.setTextColor(200, 200, 200, 0.7);
+        pdf.text("Igbogbo/Baiyeku LCDA", 105, 148, { align: "center" });
+        pdf.setTextColor(0, 0, 0, 1);
+
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`cda-report-${new Date().toISOString().split("T")[0]}.pdf`);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      // Fallback to basic PDF if html2canvas fails
+      generateBasicCDAPDF();
+    }
+  };
+
+  const downloadStreets = async () => {
+    try {
+      // Create a temporary div to render the HTML
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = generateStreetsReportHTML();
+      tempDiv.style.position = "absolute";
+      tempDiv.style.left = "-9999px";
+      tempDiv.style.width = "210mm"; // A4 width
+      document.body.appendChild(tempDiv);
+
+      // Convert to canvas then to PDF
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        width: tempDiv.scrollWidth,
+        height: tempDiv.scrollHeight,
+      });
+
+      // Remove temporary div
+      document.body.removeChild(tempDiv);
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 295; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`streets-report-${new Date().toISOString().split("T")[0]}.pdf`);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      // Fallback to basic PDF if html2canvas fails
+      generateBasicStreetsPDF();
+    }
+  };
+
+  // Fallback PDF generation functions
+  const generateBasicCDAPDF = () => {
+    const pdf = new jsPDF();
+
+    // Title
+    pdf.setFontSize(16);
+    pdf.text("IGBOGBO/BAIYEKU LCDA - CDA REPORT", 20, 20);
+
+    // Date
+    pdf.setFontSize(10);
+    pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 30);
+
+    // Table headers
+    pdf.setFontSize(12);
+    const headers = ["#", "CDA Name", "Ward", "Streets", "Properties", "Reg Date"];
+    let yPosition = 50;
+
+    // Add headers
+    headers.forEach((header, index) => {
+      pdf.text(header, 20 + index * 32, yPosition);
+    });
+
+    yPosition += 10;
+
+    // Add data rows
+    pdf.setFontSize(10);
+    mockCDAs.forEach((cda, index) => {
+      if (yPosition > 270) {
+        pdf.addPage();
+        yPosition = 20;
+      }
+
+      const row = [
+        (index + 1).toString(),
+        cda.name.substring(0, 15),
+        cda.ward.substring(0, 10),
+        cda.streetCount.toString(),
+        cda.propertyCount.toString(),
+        (cda.registrationDate || "N/A").substring(0, 8),
+      ];
+
+      row.forEach((cell, cellIndex) => {
+        pdf.text(cell, 20 + cellIndex * 32, yPosition);
+      });
+
+      yPosition += 8;
+    });
+
+    // Summary
+    yPosition += 10;
+    pdf.setFontSize(12);
+    pdf.text("SUMMARY", 20, yPosition);
+    yPosition += 8;
+    pdf.setFontSize(10);
+    pdf.text(`Total CDAs: ${mockCDAs.length}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Total Streets: ${mockCDAs.reduce((sum, cda) => sum + cda.streetCount, 0)}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Total Properties: ${mockCDAs.reduce((sum, cda) => sum + cda.propertyCount, 0)}`, 20, yPosition);
+
+    pdf.save(`cda-report-${new Date().toISOString().split("T")[0]}.pdf`);
+  };
+
+  const generateBasicStreetsPDF = () => {
+    const pdf = new jsPDF();
+
+    // Title
+    pdf.setFontSize(16);
+    pdf.text("IGBOGBO/BAIYEKU LCDA - STREETS REPORT", 20, 20);
+
+    // Date
+    pdf.setFontSize(10);
+    pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 30);
+
+    // Table headers
+    pdf.setFontSize(12);
+    const headers = ["#", "Street Name", "Ward", "CDA", "Properties", "Reg Date"];
+    let yPosition = 50;
+
+    // Add headers
+    headers.forEach((header, index) => {
+      pdf.text(header, 20 + index * 30, yPosition);
+    });
+
+    yPosition += 10;
+
+    // Add data rows
+    pdf.setFontSize(10);
+    mockStreets.forEach((street, index) => {
+      if (yPosition > 270) {
+        pdf.addPage();
+        yPosition = 20;
+      }
+
+      const row = [
+        (index + 1).toString(),
+        street.name.substring(0, 15),
+        street.ward.substring(0, 10),
+        (street.cdaName || "Multiple").substring(0, 12),
+        street.propertyCount.toString(),
+        (street.registrationDate || "N/A").substring(0, 8),
+      ];
+
+      row.forEach((cell, cellIndex) => {
+        pdf.text(cell, 20 + cellIndex * 30, yPosition);
+      });
+
+      yPosition += 8;
+    });
+
+    // Summary
+    yPosition += 10;
+    pdf.setFontSize(12);
+    pdf.text("SUMMARY", 20, yPosition);
+    yPosition += 8;
+    pdf.setFontSize(10);
+    pdf.text(`Total Streets: ${mockStreets.length}`, 20, yPosition);
+    yPosition += 6;
+    pdf.text(`Total Properties: ${mockStreets.reduce((sum, street) => sum + street.propertyCount, 0)}`, 20, yPosition);
+
+    pdf.save(`streets-report-${new Date().toISOString().split("T")[0]}.pdf`);
   };
 
   return (
@@ -237,7 +489,7 @@ const Dashboard = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="text-muted-foreground hover:text-foreground">
                     <Printer className="h-4 w-4 mr-2" />
-                    <span className="hidden sm:inline">Print</span>
+                    <span className="hidden sm:inline">Print/Export</span>
                     <ChevronDown className="h-4 w-4 ml-2" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -246,9 +498,17 @@ const Dashboard = () => {
                     <Building className="h-4 w-4 mr-2" />
                     Print CDAs
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={downloadCDAs}>
+                    <Building className="h-4 w-4 mr-2" />
+                    Download CDAs as PDF
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={printStreets}>
                     <MapPin className="h-4 w-4 mr-2" />
                     Print Registered Streets
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={downloadStreets}>
+                    <MapPin className="h-4 w-4 mr-2" />
+                    Download Streets as PDF
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -262,6 +522,7 @@ const Dashboard = () => {
         </div>
       </header>
 
+      {/* Rest of the component remains the same */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Welcome Section */}
         <div className="mb-8">
@@ -316,7 +577,7 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total Streets</p>
-                    <p className="text-2xl font-bold text-foreground">{mockStreets.length}</p>
+                    <p className="text-2xl font-bold text-foreground">{mockCDAs.reduce((sum, cda) => sum + cda.streetCount, 0)}</p>
                   </div>
                 </div>
               </CardContent>
@@ -330,7 +591,7 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total Properties</p>
-                    <p className="text-2xl font-bold text-foreground">{mockStreets.reduce((sum, street) => sum + street.propertyCount, 0)}</p>
+                    <p className="text-2xl font-bold text-foreground">{mockCDAs.reduce((sum, cda) => sum + cda.propertyCount, 0)}</p>
                   </div>
                 </div>
               </CardContent>
@@ -345,33 +606,48 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {wardsData.map((ward) => (
-              <Card
-                key={ward.name}
-                className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
-                onClick={() => handleNavigateToWard(ward.name)}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-lg font-semibold text-foreground">{ward.name}</h4>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  </div>
+            {wardsData.map((ward) => {
+              // Calculate aggregated stats for this ward
+              const wardCDAs = mockCDAs.filter((cda) => cda.ward === ward.name);
+              const totalStreets = wardCDAs.reduce((sum, cda) => sum + cda.streetCount, 0);
+              const totalProperties = wardCDAs.reduce((sum, cda) => sum + cda.propertyCount, 0);
 
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">CDAs</span>
-                      <span className="font-semibold">{ward.cdaCount}</span>
+              return (
+                <Card
+                  key={ward.name}
+                  className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
+                  onClick={() => handleNavigateToWard(ward.name)}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-lg font-semibold text-foreground">{ward.name}</h4>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
                     </div>
-                  </div>
 
-                  <div className="mt-4 pt-4 ">
-                    <Button variant="outline" size="sm" className="w-full">
-                      View CDAs
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">CDAs</span>
+                        <span className="font-semibold">{ward.cdaCount}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Total Streets</span>
+                        <span className="font-semibold">{totalStreets}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Total Properties</span>
+                        <span className="font-semibold">{totalProperties}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 pt-4 ">
+                      <Button variant="outline" size="sm" className="w-full">
+                        View CDAs
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </div>

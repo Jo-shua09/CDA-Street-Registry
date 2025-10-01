@@ -29,6 +29,10 @@ interface CdaData {
   lg: string;
   description: string;
   registrationDate: string;
+  chairman?: {
+    name: string;
+    contact: string;
+  };
 }
 
 interface CdaCardProps {
@@ -74,7 +78,15 @@ export const CdaCard = ({ cda, streets, onStreetClick, onEdit, onDelete, onEditS
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground truncate">{cda.name}</h3>
+                  <div className="flex items-start flex-col">
+                    <h3 className="text-base sm:text-lg font-semibold text-foreground truncate">{cda.name}</h3>
+                    {cda.chairman && (
+                      <span className="text-sm text-muted-foreground capitalize font-semibold">
+                        {cda.chairman.name}
+                        {cda.chairman.contact ? ` - ${cda.chairman.contact}` : ""}
+                      </span>
+                    )}
+                  </div>
                   <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1 text-xs sm:text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />

@@ -14,6 +14,9 @@ interface StreetOverviewProps {
     lcda: string;
     registrationDate: string;
     description: string;
+    image?: string;
+    ownerName?: string;
+    ownerContact?: string;
     properties: Array<{ type: string }>;
     propertyCount?: {
       houses: number;
@@ -107,16 +110,36 @@ export const StreetOverview = ({ street, handleEditStreet }: StreetOverviewProps
                 <p className="text-foreground leading-relaxed">{street.description}</p>
               </div>
 
+              {(street.ownerName || street.ownerContact) && (
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Owner Information</h3>
+                  <div className="space-y-1">
+                    {street.ownerName && (
+                      <p className="text-foreground">
+                        <span className="font-medium">Name:</span> {street.ownerName}
+                      </p>
+                    )}
+                    {street.ownerContact && (
+                      <p className="text-foreground">
+                        <span className="font-medium">Contact:</span> {street.ownerContact}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {street.image && (
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Street Image</h3>
+                  <div className="relative">
+                    <img src={street.image} alt={`${street.name} street view`} className="w-full h-48 object-cover rounded-lg border" />
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-border">
                 <div>
                   <h4 className="text-sm font-medium text-muted-foreground mb-1">Registration Date</h4>
-                  <div className="flex items-center gap-2 text-foreground">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span>{formatDate(street.registrationDate)}</span>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Last time edited </h4>
                   <div className="flex items-center gap-2 text-foreground">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span>{formatDate(street.registrationDate)}</span>
@@ -179,27 +202,6 @@ export const StreetOverview = ({ street, handleEditStreet }: StreetOverviewProps
             )}
           </CardContent>
         </Card>
-
-        {/* Quick Actions */}
-        {/* <Card>
-          <CardContent className="p-6">
-            <h3 className="font-semibold text-foreground mb-4">Quick Actions</h3>
-            <div className="space-y-2">
-              <Button variant="outline" className="w-full justify-start" size="sm">
-                <MapPin className="h-4 w-4 mr-2" />
-                View on Map
-              </Button>
-              <Button variant="outline" className="w-full justify-start" size="sm">
-                <Calendar className="h-4 w-4 mr-2" />
-                Export Report
-              </Button>
-              <Button variant="outline" className="w-full justify-start" size="sm">
-                <Users className="h-4 w-4 mr-2" />
-                Contact CDA
-              </Button>
-            </div>
-          </CardContent>
-        </Card> */}
       </div>
     </div>
   );

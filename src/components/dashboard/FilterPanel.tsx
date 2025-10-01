@@ -13,10 +13,12 @@ interface FilterPanelProps {
     cda: string[];
     propertyRange: { min: number; max: number };
     dateRange: { start: string; end: string };
+    ward?: string; // Add ward to filters to filter CDAs by ward
   };
   onFiltersChange: (filters: any) => void;
   streets: Array<{
     cda: string;
+    ward: string; // Add ward to street type for filtering
     propertyCount: {
       houses: number;
       shops: number;

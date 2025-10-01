@@ -4,26 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Card, CardContent } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Store } from "lucide-react";
+import { X, Image } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-interface HouseDetail {
-  number: string;
-  type: string;
-  description: string;
-  hasShops: boolean;
-  shops: ShopDetail[];
-}
-
-interface ShopDetail {
-  number: string;
-  type: string;
-  description: string;
-}
 
 interface StreetFormData {
   name: string;
@@ -32,12 +15,9 @@ interface StreetFormData {
   lg: string;
   lcda: string;
   description: string;
-  houses: number;
-  hotels: number;
-  others: number;
-  hasShops: boolean;
-  shopCount: number;
-  shopDetails: ShopDetail[];
+  ownerName: string;
+  ownerContact: string;
+  image?: File;
 }
 
 interface StreetFormProps {
@@ -53,31 +33,49 @@ export const StreetForm = ({ onClose, onSubmit }: StreetFormProps) => {
     lg: "",
     lcda: "",
     description: "",
-    houses: 0,
-    hotels: 0,
-    others: 0,
-    hasShops: false,
-    shopCount: 0,
-    shopDetails: [],
+    ownerName: "",
+    ownerContact: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
-
-  const totalProperties = formData.houses + formData.hotels + formData.others;
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleShopDetailsChange = (index: number, field: string, value: string) => {
-    setFormData((prev) => {
-      const newShopDetails = [...prev.shopDetails];
-      if (!newShopDetails[index]) {
-        newShopDetails[index] = { number: "", type: "", description: "" };
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB limit
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB",
+          variant: "destructive",
+        });
+        return;
       }
-      newShopDetails[index] = { ...newShopDetails[index], [field]: value };
-      return { ...prev, shopDetails: newShopDetails };
-    });
+      if (!file.type.startsWith("image/")) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select a valid image file",
+          variant: "destructive",
+        });
+        return;
+      }
+      setFormData((prev) => ({ ...prev, image: file }));
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setFormData((prev) => ({ ...prev, image: undefined }));
+    setImagePreview(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -184,162 +182,25 @@ export const StreetForm = ({ onClose, onSubmit }: StreetFormProps) => {
             </div>
           </div>
 
-          {/* Shop Section - Only show if houses > 0 */}
-          {formData.houses > 0 && (
-            <Card>
-              <CardContent className="p-4 space-y-4">
-                <div className="flex items-center gap-2">
-                  <Store className="h-5 w-5 text-primary" />
-                  <h3 className="font-medium text-foreground">House Shops</h3>
-                  <Badge variant="outline" className="text-xs">
-                    Part of House Registration
-                  </Badge>
-                </div>
-
-                <div className="space-y-3">
-                  <div>
-                    <Label className="text-sm font-medium">Does this house have any shops?</Label>
-                    <RadioGroup
-                      value={formData.hasShops ? "yes" : "no"}
-                      onValueChange={(value) => handleInputChange("hasShops", value === "yes")}
-                      className="flex space-x-4 mt-2"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="yes" id="shops-yes" />
-                        <Label htmlFor="shops-yes" className="text-sm font-normal">
-                          Yes
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="no" id="shops-no" />
-                        <Label htmlFor="shops-no" className="text-sm font-normal">
-                          No
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
-                  {formData.hasShops && (
-                    <div className="space-y-3">
-                      <div className="space-y-2">
-                        <Label htmlFor="shopCount" className="text-sm">
-                          Number of Shops *
-                        </Label>
-                        <Input
-                          id="shopCount"
-                          type="number"
-                          min="1"
-                          max="20"
-                          placeholder="Enter number of shops"
-                          value={formData.shopCount}
-                          onChange={(e) => handleInputChange("shopCount", parseInt(e.target.value) || 0)}
-                          required
-                        />
-                      </div>
-
-                      {/* Shop Details */}
-                      {formData.shopCount > 0 && (
-                        <div className="space-y-3">
-                          <div className="text-sm text-muted-foreground mb-2">These shops will be registered as part of the house property.</div>
-                          <Label className="text-sm font-medium">Shop Details</Label>
-                          {Array.from({ length: formData.shopCount }).map((_, index) => (
-                            <Card key={index} className="p-3 bg-muted/30">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Badge variant="secondary" className="text-xs">
-                                  House Shop {index + 1}
-                                </Badge>
-                                <Badge variant="outline" className="text-xs">
-                                  Part of House
-                                </Badge>
-                              </div>
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                <div>
-                                  <Label htmlFor={`shop-number-${index}`} className="text-xs">
-                                    Shop Number
-                                  </Label>
-                                  <Input
-                                    id={`shop-number-${index}`}
-                                    placeholder="e.g., S1, Shop A"
-                                    value={formData.shopDetails[index]?.number || ""}
-                                    onChange={(e) => handleShopDetailsChange(index, "number", e.target.value)}
-                                    className="h-8 text-sm"
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor={`shop-type-${index}`} className="text-xs">
-                                    Shop Type
-                                  </Label>
-                                  <Input
-                                    id={`shop-type-${index}`}
-                                    placeholder="e.g., Retail, Food, Service"
-                                    value={formData.shopDetails[index]?.type || ""}
-                                    onChange={(e) => handleShopDetailsChange(index, "type", e.target.value)}
-                                    className="h-8 text-sm"
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor={`shop-desc-${index}`} className="text-xs">
-                                    Description
-                                  </Label>
-                                  <Input
-                                    id={`shop-desc-${index}`}
-                                    placeholder="Brief description"
-                                    value={formData.shopDetails[index]?.description || ""}
-                                    onChange={(e) => handleShopDetailsChange(index, "description", e.target.value)}
-                                    className="h-8 text-sm"
-                                  />
-                                </div>
-                              </div>
-                            </Card>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="space-y-4">
-            <Label className="text-base font-medium">Property Count</Label>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="houses">Houses</Label>
-                <Input
-                  id="houses"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  value={formData.houses}
-                  onChange={(e) => handleInputChange("houses", parseInt(e.target.value) || 0)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="hotels">Hotels</Label>
-                <Input
-                  id="hotels"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  value={formData.hotels}
-                  onChange={(e) => handleInputChange("hotels", parseInt(e.target.value) || 0)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="others">Others</Label>
-                <Input
-                  id="others"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  value={formData.others}
-                  onChange={(e) => handleInputChange("others", parseInt(e.target.value) || 0)}
-                />
-              </div>
+          <div className="flex items-center gap-4 w-full">
+            <div className="space-y-2 w-full">
+              <Label htmlFor="ownerName">Owner Name</Label>
+              <Input
+                id="ownerName"
+                placeholder="Name of street owner/manager"
+                value={formData.ownerName}
+                onChange={(e) => handleInputChange("ownerName", e.target.value)}
+              />
             </div>
-            <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-              Total Properties: <span className="font-semibold text-foreground">{totalProperties}</span>
+
+            <div className="space-y-2 w-full">
+              <Label htmlFor="ownerContact">Owner Contact</Label>
+              <Input
+                id="ownerContact"
+                placeholder="Phone number or email"
+                value={formData.ownerContact}
+                onChange={(e) => handleInputChange("ownerContact", e.target.value)}
+              />
             </div>
           </div>
 
@@ -352,6 +213,31 @@ export const StreetForm = ({ onClose, onSubmit }: StreetFormProps) => {
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Street Image</Label>
+            <div className="space-y-3">
+              {!imagePreview ? (
+                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                  <Image className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <div className="space-y-2">
+                    <Label htmlFor="image-upload" className="text-sm font-medium cursor-pointer text-primary hover:text-primary/80">
+                      Click to upload image
+                    </Label>
+                    <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 5MB</p>
+                  </div>
+                  <Input id="image-upload" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                </div>
+              ) : (
+                <div className="relative">
+                  <img src={imagePreview} alt="Street preview" className="w-full h-48 object-cover rounded-lg border" />
+                  <Button type="button" variant="destructive" size="sm" className="absolute top-2 right-2" onClick={removeImage}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
 
           <DialogFooter className="gap-2">

@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, MapPin, Home, Calendar, Edit, Trash2, Plus, Search, MoreHorizontal, Eye, Building, Store, Hotel } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, MapPin, Home, Calendar, Edit, Trash2, Plus, Search, MoreHorizontal, Eye, Building, Store, Hotel, Image } from "lucide-react";
 import { PropertyForm } from "@/components/properties/PropertyForm";
 import { PropertyTable } from "@/components/properties/PropertyTable";
 import { PropertyDetails } from "@/components/properties/PropertyDetails";
@@ -21,7 +22,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-// Minimal mock data - 1 example street with 1 property
+// Minimal mock data - 1 example street with properties
 const mockStreetData = {
   1: {
     id: 1,
@@ -32,11 +33,14 @@ const mockStreetData = {
     lcda: "Victoria Island LCDA",
     registrationDate: "2023-03-15",
     description: "Main commercial avenue with mixed residential and commercial properties.",
+    ownerName: "Community Development Association",
+    ownerContact: "+234 803 123 4567",
+    image: undefined,
     propertyCount: {
-      houses: 1,
+      houses: 2,
       shops: 1,
       hotels: 1,
-      others: 1,
+      others: 0,
     },
     properties: [
       {
@@ -47,6 +51,33 @@ const mockStreetData = {
         contact: "+234 803 123 4567",
         description: "3-bedroom duplex with modern amenities",
         registrationDate: "2023-03-20",
+        hasShops: true,
+        shopCount: 1,
+        shops: [
+          {
+            number: "S1",
+            type: "Retail",
+            description: "Electronics shop",
+          },
+        ],
+      },
+      {
+        id: 3,
+        number: "22C",
+        type: "Hotel",
+        owner: "David Wilson",
+        contact: "+234 803 456 7890",
+        description: "4-star hotel with conference facilities",
+        registrationDate: "2023-05-10",
+      },
+      {
+        id: 4,
+        number: "25D",
+        type: "House",
+        owner: "Sarah Brown",
+        contact: "+234 803 234 5678",
+        description: "2-bedroom bungalow with garden",
+        registrationDate: "2023-06-05",
       },
     ],
   },
@@ -64,6 +95,35 @@ const StreetDetails = () => {
 
   const streetId = parseInt(id || "1");
   const street = mockStreetData[streetId as keyof typeof mockStreetData];
+  const [properties, setProperties] = useState(street.properties);
+
+  // Calculate dynamic property counts including aggregated shops
+  const calculatePropertyCount = () => {
+    let houses = 0;
+    let shops = 0;
+    let hotels = 0;
+    let others = 0;
+
+    properties.forEach((property) => {
+      const typeLower = property.type.toLowerCase();
+      if (typeLower === "house") {
+        houses += 1;
+        if (property.hasShops) {
+          shops += property.shopCount || 0;
+        }
+      } else if (typeLower === "shop") {
+        shops += 1;
+      } else if (typeLower === "hotel") {
+        hotels += 1;
+      } else {
+        others += 1;
+      }
+    });
+
+    return { houses, shops, hotels, others };
+  };
+
+  const dynamicPropertyCount = calculatePropertyCount();
 
   if (!street) {
     return (
@@ -85,9 +145,37 @@ const StreetDetails = () => {
 
   const handlePropertySubmit = (propertyData: any) => {
     if (editingProperty) {
-      console.log("Updating property:", propertyData);
+      // Update existing property
+      setProperties(properties.map((p) => (p.id === editingProperty.id ? { ...propertyData, id: editingProperty.id } : p)));
     } else {
-      console.log("Adding new property:", propertyData);
+      if (propertyData.type.toLowerCase() === "shop") {
+        // Find house with matching number
+        const houseIndex = properties.findIndex((p) => p.number === propertyData.houseNumber && p.type.toLowerCase() === "house");
+        if (houseIndex !== -1) {
+          const house = properties[houseIndex];
+          const updatedHouse = {
+            ...house,
+            hasShops: true,
+            shopCount: (house.shopCount || 0) + 1,
+            shops: [
+              ...(house.shops || []),
+              {
+                number: propertyData.number,
+                type: propertyData.type,
+                description: propertyData.description,
+              },
+            ],
+          };
+          setProperties(properties.map((p, i) => (i === houseIndex ? updatedHouse : p)));
+        } else {
+          // House not found, perhaps show error, but for now, do nothing
+          console.log("House not found for shop");
+        }
+      } else {
+        // Add new property
+        const newProperty = { ...propertyData, id: Date.now() };
+        setProperties([...properties, newProperty]);
+      }
     }
     setShowPropertyForm(false);
     setEditingProperty(null);
@@ -103,9 +191,7 @@ const StreetDetails = () => {
   };
 
   const handleDeleteProperty = (propertyId: number) => {
-    console.log("Deleting property:", propertyId);
-    // Here you would typically make an API call to delete the property
-    // For now, we'll just show a success message
+    setProperties(properties.filter((p) => p.id !== propertyId));
   };
 
   const handleEditStreet = () => {
@@ -115,6 +201,13 @@ const StreetDetails = () => {
   const handleStreetSubmit = (streetData: any) => {
     console.log("Updating street:", streetData);
     // Here you would typically make an API call to update the street
+    // For now, update the local mock data
+    if (mockStreetData[streetId as keyof typeof mockStreetData]) {
+      mockStreetData[streetId as keyof typeof mockStreetData] = {
+        ...mockStreetData[streetId as keyof typeof mockStreetData],
+        ...streetData,
+      };
+    }
   };
 
   const handleDeleteStreet = () => {
@@ -129,12 +222,100 @@ const StreetDetails = () => {
     navigate("/dashboard");
   };
 
-  const filteredProperties = street.properties.filter(
-    (property) =>
-      property.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      property.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      property.owner.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Property types list for search filtering
+  const propertyTypes = [
+    "House",
+    "Shop",
+    "Office",
+    "Hotel",
+    "Apartment",
+    "Warehouse",
+    "Commercial Building",
+    "Residential Building",
+    "Single-Family Home",
+    "Multi-Family Home",
+    "Condominium (Condo)",
+    "Townhouse",
+    "Mansion / Villa",
+    "Manufactured / Mobile Home",
+    "Cottage",
+    "Restaurant / Café",
+    "Shopping Mall / Plaza",
+    "Medical Office / Clinic",
+    "Factory / Manufacturing Plant",
+    "Distribution Center",
+    "Flex Space",
+    "School / University",
+    "Hospital / Nursing Home",
+    "Church / Place of Worship",
+    "Government Building",
+    "Theater / Cinema",
+    "Gas Station",
+    "Other",
+  ];
+
+  // Enhanced search with property types and shop aggregation
+  const getFilteredProperties = () => {
+    if (!searchTerm.trim()) {
+      return properties;
+    }
+
+    const searchLower = searchTerm.toLowerCase().trim();
+
+    // Check if search term matches any property type (case-insensitive)
+    const matchedType = propertyTypes.find((type) => type.toLowerCase() === searchLower);
+
+    if (matchedType === "Shop") {
+      // Aggregate shops from houses
+      let totalShops = 0;
+      properties.forEach((property) => {
+        if (property.type.toLowerCase() === "house" && property.hasShops) {
+          totalShops += property.shopCount || 0;
+        }
+      });
+      // Return a single aggregated shop property object with total count
+      return [
+        {
+          id: -1,
+          number: "Multiple",
+          type: "Shop",
+          owner: `${totalShops} shops across houses`,
+          contact: "",
+          description: `Total of ${totalShops} shops registered in houses`,
+          registrationDate: "",
+        },
+      ];
+    }
+
+    // Otherwise, filter properties by number, type, owner, or matching property type
+    return properties.filter((property) => {
+      const numberMatch = property.number.toLowerCase().includes(searchLower);
+      const typeMatch = property.type.toLowerCase().includes(searchLower);
+      const ownerMatch = property.owner.toLowerCase().includes(searchLower);
+      const typeExactMatch = matchedType ? property.type.toLowerCase() === matchedType.toLowerCase() : false;
+
+      return numberMatch || typeMatch || ownerMatch || typeExactMatch;
+    });
+  };
+
+  const filteredProperties = getFilteredProperties();
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const propertiesPerPage = 30;
+
+  // Calculate paginated properties
+  const indexOfLastProperty = currentPage * propertiesPerPage;
+  const indexOfFirstProperty = indexOfLastProperty - propertiesPerPage;
+  const currentProperties = filteredProperties.slice(indexOfFirstProperty, indexOfLastProperty);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredProperties.length / propertiesPerPage);
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -174,59 +355,111 @@ const StreetDetails = () => {
           </Button>
         </div>
 
-        {/* Street Overview */}
-        <StreetOverview street={street} handleEditStreet={handleEditStreet} />
+        <Tabs defaultValue="details" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="images">Images</TabsTrigger>
+          </TabsList>
 
-        {/* Properties Section */}
-        <div className="mt-8">
-          <Card>
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <CardTitle className="flex items-center gap-2 text-xl">
-                    <Home className="h-5 w-5" />
-                    Properties on this Street
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Manage all properties registered on <span className="font-bold">{street.name}</span>
-                  </p>
-                </div>
-                <Button onClick={() => setShowPropertyForm(true)} className="bg-primary hover:bg-primary-hover">
-                  <Plus className="h-5 w-5 mr-2" />
-                  Register New Property
-                </Button>
-              </div>
-            </CardHeader>
+          <TabsContent value="details" className="space-y-8">
+            {/* Street Overview */}
+            <StreetOverview street={street} handleEditStreet={handleEditStreet} />
 
-            <CardContent>
-              {/* Search and Stats */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search properties by number, type, or owner..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+            {/* Properties Section */}
+            <div>
+              <Card>
+                <CardHeader>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <CardTitle className="flex items-center gap-2 text-xl">
+                        <Home className="h-5 w-5" />
+                        Properties on this Street
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        Manage all properties registered on <span className="font-bold">{street.name}</span>
+                      </p>
+                    </div>
+                    <Button onClick={() => setShowPropertyForm(true)} className="bg-primary hover:bg-primary-hover">
+                      <Plus className="h-5 w-5 mr-2" />
+                      Register New Property
+                    </Button>
+                  </div>
+                </CardHeader>
+
+                <CardContent>
+                  {/* Search and Stats */}
+                  <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search properties by number, type, or owner..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                    <div className="flex gap-2 text-sm  text-muted-foreground">
+                      <Badge variant="outline">
+                        {filteredProperties.length} of {properties.length + dynamicPropertyCount.shops} properties
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Properties Table */}
+                  <PropertyTable
+                    properties={filteredProperties}
+                    onEdit={handleEditProperty}
+                    onDelete={handleDeleteProperty}
+                    onView={handleViewProperty}
                   />
-                </div>
-                <div className="flex gap-2 text-sm  text-muted-foreground">
-                  <Badge variant="outline">
-                    {filteredProperties.length} of {street.properties.length} properties
-                  </Badge>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
-              {/* Properties Table */}
-              <PropertyTable
-                properties={filteredProperties}
-                onEdit={handleEditProperty}
-                onDelete={handleDeleteProperty}
-                onView={handleViewProperty}
-              />
-            </CardContent>
-          </Card>
-        </div>
+          <TabsContent value="images" className="space-y-8">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Image className="h-5 w-5" />
+                  Street Images
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  View and manage images for <span className="font-bold">{street.name}</span>
+                </p>
+              </CardHeader>
+              <CardContent>
+                {street.image ? (
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <img src={street.image} alt={`${street.name} street view`} className="w-full h-96 object-cover rounded-lg border" />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Full Size
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Change Image
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Image className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-foreground mb-2">No Image Available</h3>
+                    <p className="text-muted-foreground mb-4">No street image has been uploaded for {street.name} yet.</p>
+                    <Button variant="outline">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Upload Image
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Property Form Modal */}

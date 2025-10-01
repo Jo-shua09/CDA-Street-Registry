@@ -21,7 +21,7 @@ interface Property {
     type: string;
     description: string;
   }>;
-  houseName?: string;
+  houseNumber?: string;
   images?: Array<{ id: string; file: File; preview: string }>;
   documents?: Array<{ id: string; name: string; file: File }>;
 }
@@ -76,7 +76,7 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl overflow-y-scroll h-full">
         <DialogHeader>
           <DialogTitle className="text-xl flex items-center gap-3">
             {getPropertyIcon(property.type)}
@@ -92,10 +92,17 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
         </DialogHeader>
 
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="flex w-full overflow-x-auto">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="images">Images ({property.images?.length || 0})</TabsTrigger>
             <TabsTrigger value="documents">Documents ({property.documents?.length || 0})</TabsTrigger>
+            {property.hasShops &&
+              property.shops &&
+              property.shops.map((_, index) => (
+                <TabsTrigger key={`shop-${index}`} value={`shop-${index}`}>
+                  Shop {index + 1}
+                </TabsTrigger>
+              ))}
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -115,6 +122,13 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
                         {property.type}
                       </Badge>
                     </div>
+
+                    {property.type.toLowerCase() === "shop" && property.houseNumber && (
+                      <div>
+                        <h3 className="text-sm font-medium text-muted-foreground mb-1">House Number</h3>
+                        <p className="text-foreground">#{property.houseNumber}</p>
+                      </div>
+                    )}
 
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">Street Location</h3>
@@ -186,7 +200,7 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
                     ))}
                   </div>
                 </CardContent>
-            </Card>
+              </Card>
             )}
 
             {/* Property Description */}
@@ -218,13 +232,13 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {property.images.map((image) => (
-                      <Card key={image.id} className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedImage(image.preview)}>
+                      <Card
+                        key={image.id}
+                        className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+                        onClick={() => setSelectedImage(image.preview)}
+                      >
                         <div className="aspect-square bg-muted relative">
-                          <img
-                            src={image.preview}
-                            alt="Property"
-                            className="w-full h-full object-cover"
-                          />
+                          <img src={image.preview} alt="Property" className="w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center">
                             <Eye className="h-6 w-6 text-white opacity-0 hover:opacity-100 transition-opacity" />
                           </div>
@@ -283,6 +297,36 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
               </CardContent>
             </Card>
           </TabsContent>
+
+          {property.hasShops &&
+            property.shops &&
+            property.shops.map((shop, index) => (
+              <TabsContent key={`shop-${index}`} value={`shop-${index}`} className="space-y-6">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Store className="h-5 w-5 text-primary" />
+                      <h3 className="font-medium text-foreground">Shop {index + 1} Details</h3>
+                      {shop.number && <Badge variant="outline">#{shop.number}</Badge>}
+                    </div>
+                    <div className="space-y-4">
+                      {shop.type && (
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground mb-1">Shop Type</h4>
+                          <p className="text-foreground">{shop.type}</p>
+                        </div>
+                      )}
+                      {shop.description && (
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground mb-1">Description</h4>
+                          <p className="text-muted-foreground leading-relaxed">{shop.description}</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            ))}
         </Tabs>
 
         {/* Image Viewer Modal */}
@@ -293,17 +337,8 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
                 <DialogTitle>Property Image</DialogTitle>
               </DialogHeader>
               <div className="relative">
-                <img
-                  src={selectedImage}
-                  alt="Property"
-                  className="w-full h-auto max-h-96 object-contain"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="absolute top-2 right-2"
-                  onClick={() => setSelectedImage(null)}
-                >
+                <img src={selectedImage} alt="Property" className="w-full h-auto max-h-96 object-contain" />
+                <Button variant="outline" size="sm" className="absolute top-2 right-2" onClick={() => setSelectedImage(null)}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -329,12 +364,7 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
                     </Button>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="absolute top-2 right-2"
-                  onClick={() => setSelectedDocument(null)}
-                >
+                <Button variant="outline" size="sm" className="absolute top-2 right-2" onClick={() => setSelectedDocument(null)}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>

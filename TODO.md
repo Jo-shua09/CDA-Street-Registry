@@ -1,7 +1,7 @@
-# TODO: Adjust Mock Data for Static Wards
-
-- [ ] Update src/pages/Dashboard.tsx: mockCDAs to 6 items (1 per ward C1-C6)
-- [ ] Update src/pages/Dashboard.tsx: mockStreets to 6 items (1 per CDA)
-- [ ] Update src/pages/Dashboard.tsx: wardsData to 6 items with cdaCount 1 each
-- [ ] Update src/pages/CDADirectory.tsx: mockCDAs to 6 items (1 per ward C1-C6)
-- [ ] Update src/pages/CDADirectory.tsx: mockStreets to 6 items (1 per CDA)
+- Update mockStreetData in StreetDetails.tsx to embed shops within houses and remove the separate shop property.
+- Convert properties to state in StreetDetails.tsx for dynamic updates.
+- Modify handlePropertySubmit in StreetDetails.tsx to add shops to the corresponding house when registering a shop, instead of adding as a separate property.
+- Test shop registration to ensure it links to houses correctly.
+- Test house registration with shops.
+- Verify display in PropertyDetails shows shops under houses.
+- Update property counts if necessary.

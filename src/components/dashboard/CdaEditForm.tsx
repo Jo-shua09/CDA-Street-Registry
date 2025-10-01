@@ -13,6 +13,10 @@ interface Cda {
   lg: string;
   description: string;
   registrationDate: string;
+  chairman?: {
+    name: string;
+    contact: string;
+  };
 }
 
 interface CdaEditFormProps {
@@ -27,6 +31,7 @@ export const CdaEditForm = ({ cda, onClose, onSubmit }: CdaEditFormProps) => {
     ward: cda.ward,
     lg: cda.lg,
     description: cda.description,
+    chairman: cda.chairman || { name: "", contact: "" },
   });
 
   // Fix validation to check ward instead of state
@@ -35,7 +40,18 @@ export const CdaEditForm = ({ cda, onClose, onSubmit }: CdaEditFormProps) => {
   const { toast } = useToast();
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (field.startsWith("chairman.")) {
+      const chairmanField = field.split(".")[1];
+      setFormData((prev) => ({
+        ...prev,
+        chairman: {
+          ...prev.chairman,
+          [chairmanField]: value,
+        },
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,6 +78,7 @@ export const CdaEditForm = ({ cda, onClose, onSubmit }: CdaEditFormProps) => {
         ward: formData.ward,
         lg: formData.lg,
         description: formData.description,
+        chairman: formData.chairman,
       };
 
       onSubmit(updatedCda);
@@ -123,6 +140,24 @@ export const CdaEditForm = ({ cda, onClose, onSubmit }: CdaEditFormProps) => {
               rows={4}
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="chairman.name">CDA Chairman Name</Label>
+            <Input
+              id="chairman.name"
+              placeholder="Enter CDA Chairman name"
+              value={formData.chairman.name}
+              onChange={(e) => handleInputChange("chairman.name", e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="chairman.contact">CDA Chairman Contact</Label>
+            <Input
+              id="chairman.contact"
+              placeholder="Enter phone number or email"
+              value={formData.chairman.contact}
+              onChange={(e) => handleInputChange("chairman.contact", e.target.value)}
             />
           </div>
 

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { X, Image } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Street {
@@ -15,6 +16,9 @@ interface Street {
   lcda: string;
   registrationDate: string;
   description: string;
+  image?: string;
+  ownerName?: string;
+  ownerContact?: string;
   properties: Array<{ type: string }>;
   propertyCount: {
     houses: number;
@@ -38,18 +42,50 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
     lg: street.lg,
     lcda: street.lcda,
     description: street.description,
-    houses: street.propertyCount.houses,
-    shops: street.propertyCount.shops,
-    hotels: street.propertyCount.hotels,
-    others: street.propertyCount.others,
+    image: street.image || null,
+    ownerName: street.ownerName || "",
+    ownerContact: street.ownerContact || "",
   });
+  const [imagePreview, setImagePreview] = useState<string | null>(street.image || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const totalProperties = formData.houses + formData.shops + formData.hotels + formData.others;
-
-  const handleInputChange = (field: string, value: string | number) => {
+  const handleInputChange = (field: string, value: string | number | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!file.type.startsWith("image/")) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select a valid image file",
+          variant: "destructive",
+        });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        setImagePreview(result);
+        setFormData((prev) => ({ ...prev, image: result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    setFormData((prev) => ({ ...prev, image: null }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,13 +106,6 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Create properties array based on updated counts
-      const properties: Array<{ type: string }> = [];
-      for (let i = 0; i < formData.houses; i++) properties.push({ type: "house" });
-      for (let i = 0; i < formData.shops; i++) properties.push({ type: "shop" });
-      for (let i = 0; i < formData.hotels; i++) properties.push({ type: "hotel" });
-      for (let i = 0; i < formData.others; i++) properties.push({ type: "other" });
-
       const updatedStreet: Street = {
         ...street,
         name: formData.name,
@@ -85,13 +114,9 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
         lg: formData.lg,
         lcda: formData.lcda,
         description: formData.description,
-        propertyCount: {
-          houses: formData.houses,
-          shops: formData.shops,
-          hotels: formData.hotels,
-          others: formData.others,
-        },
-        properties,
+        ownerName: formData.ownerName || undefined,
+        ownerContact: formData.ownerContact || undefined,
+        image: formData.image || undefined,
       };
 
       onSubmit(updatedStreet);
@@ -157,56 +182,25 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
             </div>
           </div>
 
-          <div className="space-y-4">
-            <Label className="text-base font-medium">Property Count</Label>
-            <div className="grid grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="houses">Houses</Label>
-                <Input
-                  id="houses"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  value={formData.houses}
-                  onChange={(e) => handleInputChange("houses", parseInt(e.target.value) || 0)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="shops">Shops</Label>
-                <Input
-                  id="shops"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  value={formData.shops}
-                  onChange={(e) => handleInputChange("shops", parseInt(e.target.value) || 0)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="hotels">Hotels</Label>
-                <Input
-                  id="hotels"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  value={formData.hotels}
-                  onChange={(e) => handleInputChange("hotels", parseInt(e.target.value) || 0)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="others">Others</Label>
-                <Input
-                  id="others"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  value={formData.others}
-                  onChange={(e) => handleInputChange("others", parseInt(e.target.value) || 0)}
-                />
-              </div>
+          <div className="flex items-center gap-4 w-full">
+            <div className="space-y-2 w-full">
+              <Label htmlFor="ownerName">Owner Name</Label>
+              <Input
+                id="ownerName"
+                placeholder="Name of street owner/manager"
+                value={formData.ownerName}
+                onChange={(e) => handleInputChange("ownerName", e.target.value)}
+              />
             </div>
-            <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-              Total Properties: <span className="font-semibold text-foreground">{totalProperties}</span>
+
+            <div className="space-y-2 w-full">
+              <Label htmlFor="ownerContact">Owner Contact</Label>
+              <Input
+                id="ownerContact"
+                placeholder="Phone number or email"
+                value={formData.ownerContact}
+                onChange={(e) => handleInputChange("ownerContact", e.target.value)}
+              />
             </div>
           </div>
 
@@ -219,6 +213,31 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Street Image</Label>
+            <div className="space-y-3">
+              {!imagePreview ? (
+                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                  <Image className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <div className="space-y-2">
+                    <Label htmlFor="image-upload" className="text-sm font-medium cursor-pointer text-primary hover:text-primary/80">
+                      Click to upload image
+                    </Label>
+                    <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 5MB</p>
+                  </div>
+                  <Input id="image-upload" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                </div>
+              ) : (
+                <div className="relative">
+                  <img src={imagePreview} alt="Street preview" className="w-full h-48 object-cover rounded-lg border" />
+                  <Button type="button" variant="destructive" size="sm" className="absolute top-2 right-2" onClick={removeImage}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
 
           <DialogFooter className="gap-2">

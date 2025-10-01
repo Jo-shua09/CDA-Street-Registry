@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Home, Store, Hotel, Building, Upload, X, FileImage, File, Image, Eye, Download, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Property {
   id?: number;
@@ -26,7 +27,7 @@ interface Property {
     type: string;
     description: string;
   }>;
-  houseName?: string;
+  houseNumber?: string;
   images?: Array<{ id: string; file: File; preview: string }>;
   documents?: Array<{ id: string; name: string; file: File }>;
 }
@@ -39,6 +40,37 @@ interface PropertyFormProps {
 }
 
 export const PropertyForm = ({ property, streetName, onSubmit, onClose }: PropertyFormProps) => {
+  const propertyTypes = [
+    "House",
+    "Shop",
+    "Office",
+    "Hotel",
+    "Apartment",
+    "Warehouse",
+    "Commercial Building",
+    "Residential Building",
+    "Single-Family Home",
+    "Multi-Family Home",
+    "Condominium (Condo)",
+    "Townhouse",
+    "Mansion / Villa",
+    "Manufactured / Mobile Home",
+    "Cottage",
+    "Restaurant / Café",
+    "Shopping Mall / Plaza",
+    "Medical Office / Clinic",
+    "Factory / Manufacturing Plant",
+    "Distribution Center",
+    "Flex Space",
+    "School / University",
+    "Hospital / Nursing Home",
+    "Church / Place of Worship",
+    "Government Building",
+    "Theater / Cinema",
+    "Gas Station",
+    "Other",
+  ];
+
   const [formData, setFormData] = useState({
     number: property?.number || "",
     type: property?.type || "",
@@ -48,7 +80,7 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
     hasShops: property?.hasShops || false,
     shopCount: property?.shopCount || 0,
     shops: property?.shops || [],
-    houseName: property?.houseName || "",
+    houseNumber: property?.houseNumber || "",
   });
   const [images, setImages] = useState<Array<{ id: string; file: File; preview: string }>>(property?.images || []);
   const [documents, setDocuments] = useState<Array<{ id: string; name: string; file: File }>>(property?.documents || []);
@@ -234,26 +266,31 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
 
             <div className="space-y-2">
               <Label htmlFor="type">Property Type *</Label>
-              <Input
-                id="type"
-                placeholder="e.g., House, Shop, Office, Hotel, Apartment"
-                value={formData.type}
-                onChange={(e) => handleInputChange("type", e.target.value)}
-                required
-              />
-              <p className="text-xs text-muted-foreground">Enter any property type (House, Shop, Office, etc.)</p>
+              <Select value={formData.type} onValueChange={(value) => handleInputChange("type", value)} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select property type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {propertyTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">Choose from the available property types</p>
             </div>
           </div>
 
-          {/* House Name for Shops */}
+          {/* House Number for Shops */}
           {formData.type.toLowerCase() === "shop" && (
             <div className="space-y-2">
-              <Label htmlFor="houseName">House Name *</Label>
+              <Label htmlFor="houseNumber">House Number *</Label>
               <Input
-                id="houseName"
-                placeholder="Name of the house this shop belongs to"
-                value={formData.houseName}
-                onChange={(e) => handleInputChange("houseName", e.target.value)}
+                id="houseNumber"
+                placeholder="Number of the house this shop belongs to"
+                value={formData.houseNumber}
+                onChange={(e) => handleInputChange("houseNumber", e.target.value)}
                 required
               />
               <p className="text-xs text-muted-foreground">This shop will be registered as part of the specified house</p>

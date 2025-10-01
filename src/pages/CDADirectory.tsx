@@ -8,15 +8,7 @@ import { FilterPanel } from "@/components/dashboard/FilterPanel";
 import { CdaCard } from "@/components/dashboard/CdaCard";
 import { CdaEditForm } from "@/components/dashboard/CdaEditForm";
 import { StreetEditForm } from "@/components/street/StreetEditForm";
-
-interface CdaData {
-  id: number;
-  name: string;
-  ward: string;
-  lg: string;
-  description: string;
-  registrationDate: string;
-}
+import { extendedMockCDAs, extendedMockStreets, ExtendedCdaData, ExtendedStreetData } from "@/data/mockData";
 
 interface Street {
   id: number;
@@ -36,93 +28,8 @@ interface Street {
   };
 }
 
-// Mock data - Expanded for pagination testing
-const mockCDAs: CdaData[] = [
-  { id: 1, name: "Phase 1 CDA", ward: "Ward C1", lg: "Lagos Island LGA", description: "First phase CDA", registrationDate: "2023-01-01" },
-  { id: 2, name: "Sunrise CDA", ward: "Ward C2", lg: "Lagos Island LGA", description: "Sunrise community CDA", registrationDate: "2023-02-01" },
-  { id: 3, name: "Palm Grove CDA", ward: "Ward C3", lg: "Lagos Island LGA", description: "Palm Grove CDA", registrationDate: "2023-03-01" },
-  { id: 4, name: "Royal Estate CDA", ward: "Ward C4", lg: "Lagos Island LGA", description: "Royal Estate CDA", registrationDate: "2023-04-01" },
-  { id: 5, name: "Mountain Top CDA", ward: "Ward C5", lg: "Lagos Island LGA", description: "Mountain Top CDA", registrationDate: "2023-05-01" },
-  { id: 6, name: "River Side CDA", ward: "Ward C6", lg: "Lagos Island LGA", description: "River Side CDA", registrationDate: "2023-06-01" },
-];
-
-const mockStreets: Street[] = [
-  {
-    id: 1,
-    name: "Ahmadu Bello Avenue",
-    cda: "Phase 1 CDA",
-    ward: "Ward C1",
-    lg: "Lagos Island LGA",
-    lcda: "Victoria Island LCDA",
-    propertyCount: { houses: 1, shops: 0, hotels: 0, others: 0 },
-    registrationDate: "2023-03-15",
-    description: "Main commercial avenue with mixed residential and commercial properties",
-    properties: [{ type: "house" }],
-  },
-  {
-    id: 2,
-    name: "Allen Avenue",
-    cda: "Sunrise CDA",
-    ward: "Ward C2",
-    lg: "Lagos Island LGA",
-    lcda: "Victoria Island LCDA",
-    propertyCount: { houses: 1, shops: 0, hotels: 0, others: 0 },
-    registrationDate: "2023-04-15",
-    description: "Residential and commercial street in Sunrise CDA",
-    properties: [{ type: "house" }],
-  },
-  {
-    id: 3,
-    name: "Palm Street",
-    cda: "Palm Grove CDA",
-    ward: "Ward C3",
-    lg: "Lagos Island LGA",
-    lcda: "Victoria Island LCDA",
-    propertyCount: { houses: 1, shops: 0, hotels: 0, others: 0 },
-    registrationDate: "2023-05-15",
-    description: "Mixed use street with palm trees lining the avenue",
-    properties: [{ type: "house" }],
-  },
-  {
-    id: 4,
-    name: "Royal Road",
-    cda: "Royal Estate CDA",
-    ward: "Ward C4",
-    lg: "Lagos Island LGA",
-    lcda: "Victoria Island LCDA",
-    propertyCount: { houses: 1, shops: 0, hotels: 0, others: 0 },
-    registrationDate: "2023-06-15",
-    description: "Exclusive residential street in Royal Estate",
-    properties: [{ type: "house" }],
-  },
-  {
-    id: 5,
-    name: "Mountain View",
-    cda: "Mountain Top CDA",
-    ward: "Ward C5",
-    lg: "Lagos Island LGA",
-    lcda: "Victoria Island LCDA",
-    propertyCount: { houses: 1, shops: 0, hotels: 0, others: 0 },
-    registrationDate: "2023-07-15",
-    description: "Scenic street with mountain views",
-    properties: [{ type: "house" }],
-  },
-  {
-    id: 6,
-    name: "River Bank",
-    cda: "River Side CDA",
-    ward: "Ward C6",
-    lg: "Lagos Island LGA",
-    lcda: "Victoria Island LCDA",
-    propertyCount: { houses: 1, shops: 0, hotels: 0, others: 0 },
-    registrationDate: "2023-08-15",
-    description: "Riverside street with waterfront properties",
-    properties: [{ type: "house" }],
-  },
-];
-
-// Group streets by ward, then by CDA - MOVE THIS BEFORE THE COMPONENT
-const groupedData = mockStreets.reduce((acc, street) => {
+// Group streets by ward, then by CDA
+const groupedData = extendedMockStreets.reduce((acc, street) => {
   if (!acc[street.ward]) {
     acc[street.ward] = {};
   }
@@ -131,7 +38,7 @@ const groupedData = mockStreets.reduce((acc, street) => {
   }
   acc[street.ward][street.cda].push(street);
   return acc;
-}, {} as Record<string, Record<string, Street[]>>);
+}, {} as Record<string, Record<string, ExtendedStreetData[]>>);
 
 const CDADirectory = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -149,8 +56,8 @@ const CDADirectory = () => {
   const [deletingType, setDeletingType] = useState<"cda" | "street" | null>(null);
   const [showCdaEditForm, setShowCdaEditForm] = useState(false);
   const [showStreetEditForm, setShowStreetEditForm] = useState(false);
-  const [editingCda, setEditingCda] = useState<CdaData | null>(null);
-  const [editingStreet, setEditingStreet] = useState<Street | null>(null);
+  const [editingCda, setEditingCda] = useState<ExtendedCdaData | null>(null);
+  const [editingStreet, setEditingStreet] = useState<ExtendedStreetData | null>(null);
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -165,28 +72,57 @@ const CDADirectory = () => {
     setCurrentPage(1);
   }, [searchParams, selectedFilters, searchTerm]);
 
+  // Reset filters when ward changes
+  useEffect(() => {
+    setSelectedFilters({
+      cda: [],
+      propertyRange: { min: 0, max: 100 },
+      dateRange: { start: "", end: "" },
+    });
+    setCurrentPage(1);
+  }, [selectedWard]);
+
   // Get unique wards sorted
-  const wards = Array.from(new Set(mockCDAs.map((cda) => cda.ward))).sort();
+  const wards = Array.from(new Set(extendedMockCDAs.map((cda) => cda.ward))).sort();
 
   // Filter CDAs based on search, filters, and selected ward
-  const filteredCdas = mockCDAs.filter((cda) => {
+  const filteredCdas = extendedMockCDAs.filter((cda) => {
+    if (selectedWard && cda.ward !== selectedWard) {
+      return false; // Only show CDAs of the selected ward
+    }
+
     const streets = groupedData[cda.ward]?.[cda.name] || [];
+
+    // Filter streets by registration date range
+    const filteredStreetsByDate = streets.filter((street) => {
+      const streetDate = new Date(street.registrationDate);
+      const startDate = selectedFilters.dateRange.start ? new Date(selectedFilters.dateRange.start) : null;
+      const endDate = selectedFilters.dateRange.end ? new Date(selectedFilters.dateRange.end) : null;
+
+      if (startDate && streetDate < startDate) return false;
+      if (endDate && streetDate > endDate) return false;
+      return true;
+    });
+
+    // If no streets after date filter, exclude this CDA
+    if (filteredStreetsByDate.length === 0) {
+      return false;
+    }
+
     const matchesSearch =
       cda.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       cda.ward.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      streets.some((street) => street.name.toLowerCase().includes(searchTerm.toLowerCase()));
+      filteredStreetsByDate.some((street) => street.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesCDA = selectedFilters.cda.length === 0 || selectedFilters.cda.includes(cda.name);
 
-    const totalProperties = streets.reduce((sum, street) => {
+    const totalProperties = filteredStreetsByDate.reduce((sum, street) => {
       return sum + street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others;
     }, 0);
 
     const matchesPropertyCount = totalProperties >= selectedFilters.propertyRange.min && totalProperties <= selectedFilters.propertyRange.max;
 
-    const matchesWard = !selectedWard || cda.ward === selectedWard;
-
-    return matchesSearch && matchesCDA && matchesPropertyCount && matchesWard;
+    return matchesSearch && matchesCDA && matchesPropertyCount;
   });
 
   // Pagination
@@ -202,15 +138,18 @@ const CDADirectory = () => {
     navigate(`/street/${streetId}`);
   };
 
-  const handleEditCda = (cda: CdaData) => {
+  const handleEditCda = (cda: ExtendedCdaData) => {
     setEditingCda(cda);
     setShowCdaEditForm(true);
   };
 
-  const handleCdaEditSubmit = (updatedCda: CdaData) => {
-    const index = mockCDAs.findIndex((cda) => cda.id === updatedCda.id);
+  const handleCdaEditSubmit = (updatedCda: ExtendedCdaData) => {
+    const index = extendedMockCDAs.findIndex((cda) => cda.id === updatedCda.id);
     if (index !== -1) {
-      mockCDAs[index] = updatedCda;
+      extendedMockCDAs[index] = {
+        ...extendedMockCDAs[index],
+        ...updatedCda,
+      };
     }
     setShowCdaEditForm(false);
     setEditingCda(null);
@@ -222,15 +161,15 @@ const CDADirectory = () => {
     setShowDeleteConfirm(true);
   };
 
-  const handleEditStreet = (street: Street) => {
+  const handleEditStreet = (street: ExtendedStreetData) => {
     setEditingStreet(street);
     setShowStreetEditForm(true);
   };
 
-  const handleStreetEditSubmit = (updatedStreet: Street) => {
-    const index = mockStreets.findIndex((s) => s.id === updatedStreet.id);
+  const handleStreetEditSubmit = (updatedStreet: ExtendedStreetData) => {
+    const index = extendedMockStreets.findIndex((s) => s.id === updatedStreet.id);
     if (index !== -1) {
-      mockStreets[index] = updatedStreet;
+      extendedMockStreets[index] = updatedStreet;
     }
     setShowStreetEditForm(false);
     setEditingStreet(null);
@@ -244,14 +183,14 @@ const CDADirectory = () => {
 
   const confirmDelete = () => {
     if (deletingType === "cda" && deletingCdaId !== null) {
-      const index = mockCDAs.findIndex((cda) => cda.id === deletingCdaId);
+      const index = extendedMockCDAs.findIndex((cda) => cda.id === deletingCdaId);
       if (index !== -1) {
-        mockCDAs.splice(index, 1);
+        extendedMockCDAs.splice(index, 1);
       }
     } else if (deletingType === "street" && deletingStreetId !== null) {
-      const index = mockStreets.findIndex((street) => street.id === deletingStreetId);
+      const index = extendedMockStreets.findIndex((street) => street.id === deletingStreetId);
       if (index !== -1) {
-        mockStreets.splice(index, 1);
+        extendedMockStreets.splice(index, 1);
       }
     }
     setShowDeleteConfirm(false);
@@ -359,7 +298,7 @@ const CDADirectory = () => {
                             const streets = groupedData[cda.ward]?.[cda.name] || [];
                             return sum + streets.length;
                           }, 0)
-                        : mockStreets.length}
+                        : extendedMockStreets.length}
                     </p>
                   </div>
                 </div>
@@ -391,7 +330,7 @@ const CDADirectory = () => {
                               }, 0)
                             );
                           }, 0)
-                        : mockStreets.reduce((sum, street) => {
+                        : extendedMockStreets.reduce((sum, street) => {
                             const total =
                               street.propertyCount.houses + street.propertyCount.shops + street.propertyCount.hotels + street.propertyCount.others;
                             return sum + total;
@@ -437,7 +376,11 @@ const CDADirectory = () => {
           {/* Filter Panel */}
           {showFilters && (
             <div className="lg:w-80">
-              <FilterPanel filters={selectedFilters} onFiltersChange={setSelectedFilters} streets={mockStreets} />
+              <FilterPanel
+                filters={{ ...selectedFilters, ward: selectedWard || undefined }}
+                onFiltersChange={setSelectedFilters}
+                streets={selectedWard ? extendedMockStreets.filter((street) => street.ward === selectedWard) : extendedMockStreets}
+              />
             </div>
           )}
 
@@ -491,29 +434,30 @@ const CDADirectory = () => {
               </Card>
             ) : (
               <div className="space-y-8">
-                {wards.map((ward) => {
-                  const cdaInWard = paginatedCDAs.filter((cda) => cda.ward === ward);
-                  if (cdaInWard.length === 0) return null;
-                  return (
-                    <div key={ward} className="space-y-4">
-                      <h3 className="text-xl font-semibold text-foreground border-b pb-2">{ward}</h3>
-                      <div className="space-y-4">
-                        {cdaInWard.map((cda) => (
-                          <CdaCard
-                            key={cda.id}
-                            cda={cda}
-                            streets={groupedData[cda.ward]?.[cda.name] || []}
-                            onStreetClick={handleStreetClick}
-                            onEdit={handleEditCda}
-                            onDelete={handleDeleteCda}
-                            onEditStreet={handleEditStreet}
-                            onDeleteStreet={handleDeleteStreet}
-                          />
-                        ))}
+                {Array.from(new Set(filteredCdas.map((cda) => cda.ward)))
+                  .sort()
+                  .map((ward) => {
+                    const cdaInWard = paginatedCDAs.filter((cda) => cda.ward === ward);
+                    return (
+                      <div key={ward} className="space-y-4">
+                        <h3 className="text-xl font-semibold text-foreground border-b pb-2">{ward}</h3>
+                        <div className="space-y-4">
+                          {cdaInWard.map((cda) => (
+                            <CdaCard
+                              key={cda.id}
+                              cda={cda}
+                              streets={groupedData[cda.ward]?.[cda.name] || []}
+                              onStreetClick={handleStreetClick}
+                              onEdit={handleEditCda}
+                              onDelete={handleDeleteCda}
+                              onEditStreet={handleEditStreet}
+                              onDeleteStreet={handleDeleteStreet}
+                            />
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
               </div>
             )}
 

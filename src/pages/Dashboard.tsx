@@ -53,7 +53,14 @@ const Dashboard = () => {
   const logoUrl = "./logo.png";
 
   // Static wards data - hardcoded as requested
-  const staticWards = ["Ward C1", "Ward C2", "Ward C3", "Ward C4", "Ward C5", "Ward C6"];
+  const staticWards = [
+    "Ward C1 (Central & Northern Igbogbo)",
+    "Ward C2 (South & Southwestern Igbogbo)",
+    "Ward C3 (Southeastern Igbogbo)",
+    "Ward C4 (Western & Industrial Corridor)",
+    "Ward C5 (Northwestern Igbogbo)",
+    "Ward C6 (Coastal & Eastern Igbogbo)",
+  ];
 
   // Load data from localStorage on component mount and when refreshTrigger changes
   useEffect(() => {

@@ -201,7 +201,7 @@ export const StreetForm = ({ onClose, onSubmit, cdas }: StreetFormProps) => {
             />
           </div>
 
-          <div className="flex items-center w-full gap-4">
+          <div className="flex md:flex-nowrap flex-wrap items-center gap-4 w-full">
             <div className="space-y-2 w-full">
               <Label htmlFor="ward">Ward *</Label>
               <Select value={formData.ward} onValueChange={(value) => handleInputChange("ward", value)}>
@@ -227,7 +227,7 @@ export const StreetForm = ({ onClose, onSubmit, cdas }: StreetFormProps) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 w-full">
+          <div className="flex md:flex-nowrap flex-wrap items-center gap-4 w-full">
             <div className="space-y-2 w-full">
               <Label className="leading-tight" htmlFor="lcda">
                 Local Council Development Area *
@@ -256,7 +256,7 @@ export const StreetForm = ({ onClose, onSubmit, cdas }: StreetFormProps) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 w-full">
+          <div className="flex md:flex-nowrap flex-wrap items-center gap-4 w-full">
             <div className="space-y-2 w-full">
               <Label htmlFor="ownerName">Owner Name</Label>
               <Input
@@ -283,7 +283,7 @@ export const StreetForm = ({ onClose, onSubmit, cdas }: StreetFormProps) => {
             <Textarea
               id="description"
               placeholder="Brief description of the street"
-              rows={4}
+              rows={5}
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
             />

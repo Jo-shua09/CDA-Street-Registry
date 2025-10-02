@@ -158,7 +158,7 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
             />
           </div>
 
-          <div className="flex items-center w-full gap-4">
+          <div className="flex md:flex-nowrap flex-wrap items-center gap-4 w-full">
             <div className="space-y-2 w-full">
               <Label htmlFor="ward">Ward *</Label>
               <Input id="ward" placeholder="Enter ward" value={formData.ward} onChange={(e) => handleInputChange("ward", e.target.value)} required />
@@ -170,7 +170,7 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
             </div>
           </div>
 
-          <div className="flex items-center gap-4 w-full">
+          <div className="flex md:flex-nowrap flex-wrap items-center gap-4 w-full">
             <div className="space-y-2 w-full">
               <Label htmlFor="lcda">Local Council Development Area *</Label>
               <Input id="lcda" placeholder="Enter LCDA" value={formData.lcda} onChange={(e) => handleInputChange("lcda", e.target.value)} required />
@@ -182,7 +182,7 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
             </div>
           </div>
 
-          <div className="flex items-center gap-4 w-full">
+          <div className="flex md:flex-nowrap flex-wrap items-center gap-4 w-full">
             <div className="space-y-2 w-full">
               <Label htmlFor="ownerName">Owner Name</Label>
               <Input
@@ -209,7 +209,7 @@ export const StreetEditForm = ({ street, onClose, onSubmit }: StreetEditFormProp
             <Textarea
               id="description"
               placeholder="Brief description of the street"
-              rows={4}
+              rows={5}
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
             />

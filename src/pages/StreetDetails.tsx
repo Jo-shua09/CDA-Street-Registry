@@ -280,7 +280,7 @@ const StreetDetails = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center sm:space-x-3 space-x-1">
                 <div className="bg-primary p-2 sm:p-3 rounded-lg">
                   <MapPin className="sm:h-6 h-5 w-5 sm:w-6 text-primary-foreground" />
                 </div>
@@ -303,10 +303,10 @@ const StreetDetails = () => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="w-fit mb-6">
-          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-4 w-4 mr-2" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="w-fit mb-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="text-muted-foreground bg-secondary hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" />
             Back
           </Button>
         </div>
@@ -324,7 +324,7 @@ const StreetDetails = () => {
             {/* Properties Section */}
             <div>
               <Card>
-                <CardHeader>
+                <CardHeader className="sm:p-6 p-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <CardTitle className="flex items-center gap-2 text-xl">
@@ -342,7 +342,7 @@ const StreetDetails = () => {
                   </div>
                 </CardHeader>
 
-                <CardContent>
+                <CardContent className="sm:p-6 p-3">
                   {/* Search and Stats */}
                   <div className="flex flex-col sm:flex-row gap-4 mb-6">
                     <div className="relative flex-1">
@@ -351,7 +351,7 @@ const StreetDetails = () => {
                         placeholder="Search properties by number, type, or owner..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
+                        className="pl-10 placeholder:text-sm sm:placeholder:text-lg"
                       />
                     </div>
                     <div className="flex gap-2 text-sm  text-muted-foreground">

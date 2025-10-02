@@ -89,23 +89,23 @@ export const StreetOverview = ({ street, handleEditStreet }: StreetOverviewProps
       {/* Main Street Information */}
       <div className="lg:col-span-2">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className=" p-3 sm:p-6">
             <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="bg-primary-light p-3 rounded-xl">
-                  <MapPin className="h-6 w-6 text-primary" />
+              <div className="flex items-center space-x-1 sm:space-x-3">
+                <div className="bg-primary-light p-2 sm:p-3 rounded-xl">
+                  <MapPin className="sm:h-6 sm:w-6 h-4 w-4 text-primary" />
                 </div>
-                <h2 className="text-xl leading-5 sm:text-2xl font-bold text-foreground">{street.name}</h2>
+                <h2 className="text-lg leading-5 sm:text-2xl font-bold text-foreground">{street.name}</h2>
               </div>
 
               <Button variant="outline" size="sm" onClick={handleEditStreet}>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Details
+                <Edit className="h-4 w-4" />
+                <span className="hidden sm:block">Edit Details</span>
               </Button>
             </div>
 
             <div className="my-5">
-              <div className="grid grid-cols-2 max-w-fit sm:grid-cols-2 lg:grid-cols-3 items-end gap-y-1 gap-x-2 mt-1">
+              <div className="flex sm:flex-nowrap flex-wrap max-w-fit  items-end gap-y-1 gap-x-2 mt-1">
                 <Badge variant="outline" className="text-xs text-nowrap w-fit">
                   {street.ward}
                 </Badge>
@@ -124,22 +124,23 @@ export const StreetOverview = ({ street, handleEditStreet }: StreetOverviewProps
 
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-2">Description</h3>
-                <p className="text-foreground leading-relaxed">{street.description}</p>
+                <h3 className="text-lg font-medium text-muted-foreground mb-1">Description</h3>
+                <p className="text-foreground text-sm leading-relaxed">{street.description}</p>
               </div>
 
               {((street.ownerName && street.ownerName.trim() !== "") || (street.ownerContact && street.ownerContact.trim() !== "")) && (
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Owner Information</h3>
+                  <h3 className="text-lg font-medium text-muted-foreground mb-1">Owner Information</h3>
                   <div className="space-y-1">
                     {street.ownerName && street.ownerName.trim() !== "" && (
-                      <p className="text-foreground">
-                        <span className="font-medium">Name:</span> {street.ownerName}
+                      <p className="text-foreground space-x-1">
+                        <span className="font-bold text-sm">Name:</span>
+                        <span className="">{street.ownerName}</span>
                       </p>
                     )}
                     {street.ownerContact && street.ownerContact.trim() !== "" && (
-                      <p className="text-foreground">
-                        <span className="font-medium">Contact:</span> {street.ownerContact}
+                      <p className="text-foreground space-x-1">
+                        <span className="font-bold text-sm">Contact:</span> <span className="">{street.ownerContact}</span>
                       </p>
                     )}
                   </div>
@@ -147,7 +148,7 @@ export const StreetOverview = ({ street, handleEditStreet }: StreetOverviewProps
               )}
               {street.image && (
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Street Image</h3>
+                  <h3 className="text-lg font-medium text-muted-foreground mb-2">Street Image</h3>
                   <div className="relative">
                     <img
                       src={street.image}

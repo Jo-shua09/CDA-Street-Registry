@@ -35,6 +35,16 @@ interface PropertyTableProps {
 export const PropertyTable = ({ properties, onEdit, onDelete, onView }: PropertyTableProps) => {
   const [deleteProperty, setDeleteProperty] = useState<Property | null>(null);
 
+  const formatDate = (dateString: string) => {
+    // Ensure the date string is treated as local date, not UTC
+    const date = new Date(dateString + "T00:00:00");
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   const getPropertyIcon = (type: string) => {
     switch (type.toLowerCase()) {
       case "house":
@@ -59,14 +69,6 @@ export const PropertyTable = ({ properties, onEdit, onDelete, onView }: Property
       default:
         return "secondary";
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
   };
 
   const handleDelete = () => {

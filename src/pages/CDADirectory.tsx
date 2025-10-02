@@ -510,7 +510,7 @@ const CDADirectory = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-2">
         <div className="my-4">
-          <Button variant="ghost" size="sm" onClick={handleBackToDashboard} className="mr-2">
+          <Button variant="ghost" size="sm" onClick={handleBackToDashboard} className="bg-secondary">
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard
           </Button>
@@ -695,9 +695,12 @@ const CDADirectory = () => {
                   </>
                 ) : (
                   <>
-                    Showing {paginatedCDAs.length} of {displayCDAs.length} CDAs
-                    {selectedWard && ` in ${selectedWard}`}
-                    {` (Page ${currentPage} of ${totalPages})`}
+                    <div className="flex gap-x-1">
+                      Showing {paginatedCDAs.length} of {displayCDAs.length} CDAs
+                      {selectedWard && ` in ${selectedWard}`}
+                      <span className="hidden sm:block">{` (Page ${currentPage} of ${totalPages})`}</span>
+                    </div>
+                    <div className="block sm:hidden">{` (Page ${currentPage} of ${totalPages})`}</div>
                   </>
                 )}
               </p>

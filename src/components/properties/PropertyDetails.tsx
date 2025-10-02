@@ -76,9 +76,9 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl overflow-y-scroll h-full">
+      <DialogContent className="max-w-3xl w-full sm:p-6 p-3 overflow-y-scroll h-full">
         <DialogHeader>
-          <DialogTitle className="text-xl flex items-center gap-3">
+          <DialogTitle className="text-xl flex items-center gap-2 sm:gap-3">
             {getPropertyIcon(property.type)}
             Property #{property.number}
             {property.hasShops && (
@@ -88,11 +88,13 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
               </Badge>
             )}
           </DialogTitle>
-          <DialogDescription>Detailed information for property on {streetName}</DialogDescription>
+          <DialogDescription>
+            Detailed information for property on <span className="font-bold">{streetName}</span>
+          </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="flex w-full overflow-x-auto">
+          <TabsList className="flex w-full h-fit gap-1 sm:flex-nowrap flex-wrap">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="images">Images ({property.images?.length || 0})</TabsTrigger>
             <TabsTrigger value="documents">Documents ({property.documents?.length || 0})</TabsTrigger>
@@ -108,7 +110,7 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
           <TabsContent value="overview" className="space-y-6">
             {/* Property Overview */}
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
@@ -165,7 +167,7 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
             {/* Shop Information */}
             {property.hasShops && property.shops && property.shops.length > 0 && (
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-3 sm:p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <Store className="h-5 w-5 text-primary" />
                     <h3 className="font-medium text-foreground">Shop Information</h3>
@@ -205,7 +207,7 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
 
             {/* Property Description */}
             <Card>
-              <CardContent className="p-6">
+              <CardContent className=" p-3 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <FileText className="h-4 w-4 text-muted-foreground" />
                   <h3 className="font-medium text-foreground">Property Description</h3>
@@ -217,10 +219,12 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
 
           <TabsContent value="images" className="space-y-6">
             <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Image className="h-5 w-5 text-primary" />
-                  <h3 className="font-medium text-foreground">Property Images</h3>
+              <CardContent className="p-3 sm:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-1">
+                    <Image className="h-5 w-5 text-primary" />
+                    <h3 className="font-medium text-foreground">Property Images</h3>
+                  </div>
                   <Badge variant="secondary">{property.images?.length || 0} images</Badge>
                 </div>
 
@@ -253,7 +257,7 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
 
           <TabsContent value="documents" className="space-y-6">
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <File className="h-5 w-5 text-primary" />
                   <h3 className="font-medium text-foreground">Property Documents</h3>
@@ -303,7 +307,7 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
             property.shops.map((shop, index) => (
               <TabsContent key={`shop-${index}`} value={`shop-${index}`} className="space-y-6">
                 <Card>
-                  <CardContent className="p-6">
+                  <CardContent className="p-3 sm:p-6">
                     <div className="flex items-center gap-2 mb-4">
                       <Store className="h-5 w-5 text-primary" />
                       <h3 className="font-medium text-foreground">Shop {index + 1} Details</h3>
@@ -373,7 +377,7 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
         )}
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
+        <div className="flex items-center justify-end gap-x-3 sm:pt-4 border-t border-border">
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
@@ -384,8 +388,8 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
               onClose();
             }}
           >
-            <Edit className="h-4 w-4 mr-2" />
-            Edit Property
+            <Edit className="h-4 w-4" />
+            <span className="hidden sm:block">Edit Property</span>
           </Button>
           <Button
             variant="destructive"
@@ -394,8 +398,8 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
               onClose();
             }}
           >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete Property
+            <Trash2 className="h-4 w-4" />
+            <span className="hidden sm:block">Delete Property</span>
           </Button>
         </div>
       </DialogContent>

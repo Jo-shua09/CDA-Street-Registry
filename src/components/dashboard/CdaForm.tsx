@@ -104,7 +104,7 @@ export const CdaForm = ({ onClose, onSubmit }: CdaFormProps) => {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl overflow-y-scroll h-full">
         <DialogHeader>
           <DialogTitle className="text-xl">Register New CDA</DialogTitle>
           <DialogDescription>Add a new Community Development Association</DialogDescription>
@@ -122,7 +122,7 @@ export const CdaForm = ({ onClose, onSubmit }: CdaFormProps) => {
             />
           </div>
 
-          <div className="flex items-center gap-4 w-full">
+          <div className="flex md:flex-nowrap flex-wrap items-center gap-4 w-full">
             <div className="space-y-2 w-full">
               <Label htmlFor="ward">Ward *</Label>
               <Select value={formData.ward} onValueChange={(value) => handleInputChange("ward", value)}>
@@ -151,7 +151,7 @@ export const CdaForm = ({ onClose, onSubmit }: CdaFormProps) => {
             <Textarea
               id="description"
               placeholder="Brief description of the CDA"
-              rows={4}
+              rows={5}
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
             />

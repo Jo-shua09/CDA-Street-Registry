@@ -452,7 +452,7 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
             <Textarea
               id="description"
               placeholder="Brief description of the property, notable features, etc."
-              rows={3}
+              rows={5}
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
             />

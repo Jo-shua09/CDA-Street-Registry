@@ -107,7 +107,36 @@ const Login = () => {
 
         {/* Footer */}
         <div className="mt-8 text-center">
-          <p className="text-xs text-muted-foreground">© 2025 CDA Street & Property Registry System</p>
+          <div className="border border-yellow-300 bg-yellow-50 rounded-md p-5 text-sm text-gray-700">
+            <div className="flex items-start">
+              <svg
+                className="w-5 h-5 text-yellow-500 mt-0.5 mr-2"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 9v2m0 4h.01M12 5.5a6.5 6.5 0 11-6.5 6.5 6.5 6.5 0 016.5-6.5z"
+                />
+              </svg>
+              <div>
+                <p className="font-semibold text-lg">Forgot your login details?</p>
+                <p className="mt-1">
+                  If you have forgotten your login credentials or need assistance accessing your account, please contact the ICT department at
+                  <a href="mailto:ict@iblcdacda.lg.gov.ng" className="text-yellow-700 px-1 underline">
+                    ict@iblcdacda.lg.gov.ng
+                  </a>
+                  or call <span className="text-yellow-700 font-medium">+234-123-456-7890</span>.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-xs text-muted-foreground mt-4">© 2025 CDA Street & Property Registry System</p>
         </div>
       </div>
     </div>

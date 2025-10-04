@@ -116,7 +116,7 @@ export const PropertyTable = ({ properties, onEdit, onDelete, onView }: Property
                 </TableCell>
 
                 <TableCell>
-                  <Badge variant={getTypeVariant(property.type) as any} className="capitalize">
+                  <Badge variant={getTypeVariant(property.type) as any} className="capitalize text-nowrap">
                     {property.type}
                   </Badge>
                 </TableCell>

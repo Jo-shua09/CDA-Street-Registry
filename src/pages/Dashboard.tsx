@@ -164,7 +164,7 @@ const Dashboard = () => {
         <head>
           <title>CDA Report</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
+            body { font-family: Arial, sans-serif; margin: 20px; padding: 10px; }
             h1 { text-align: center; color: #333; }
             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
             th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
@@ -236,7 +236,7 @@ const Dashboard = () => {
         <head>
           <title>Registered Streets Report</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
+            body { font-family: Arial, sans-serif; margin: 20px; padding: 10px; }
             h1 { text-align: center; color: #333; }
             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
             th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
@@ -353,9 +353,9 @@ const Dashboard = () => {
       let heightLeft = imgHeight;
       let position = 0;
 
-      // Add text watermark with 70% opacity centered
+      // Add text watermark with 50% opacity centered
       pdf.setFontSize(50);
-      pdf.setTextColor(200, 200, 200, 0.7);
+      pdf.setTextColor(200, 200, 200, 0.3);
       pdf.text("Igbogbo/Baiyeku LCDA", 105, 148, { align: "center" });
       pdf.setTextColor(0, 0, 0, 1);
 
@@ -368,7 +368,7 @@ const Dashboard = () => {
 
         // Add text watermark on each page
         pdf.setFontSize(50);
-        pdf.setTextColor(200, 200, 200, 0.7);
+        pdf.setTextColor(200, 200, 200, 0.3);
         pdf.text("Igbogbo/Baiyeku LCDA", 105, 148, { align: "center" });
         pdf.setTextColor(0, 0, 0, 1);
 

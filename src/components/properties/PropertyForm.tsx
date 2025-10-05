@@ -206,7 +206,15 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
         owner: formData.owner,
         contact: formData.contact,
         description: formData.description,
-        registrationDate: property?.registrationDate || new Date().toISOString().split("T")[0], // Use proper date format
+        registrationDate:
+          property?.registrationDate ||
+          (() => {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, "0");
+            const day = String(today.getDate()).padStart(2, "0");
+            return `${year}-${month}-${day}`;
+          })(), // Use local date format
         hasShops: formData.hasShops,
         shopCount: formData.shopCount,
         shops: formData.hasShops

@@ -52,7 +52,9 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    // Ensure the date string is treated as local date, not UTC
+    const date = new Date(dateString + "T00:00:00");
+    return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",

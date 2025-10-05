@@ -47,7 +47,7 @@ const Dashboard = () => {
   const [showCdaForm, setShowCdaForm] = useState(false);
   const [cdas, setCdas] = useState<ExtendedCdaData[]>([]);
   const [streets, setStreets] = useState<ExtendedStreetData[]>([]);
-  const [properties, setProperties] = useState<any[]>([]);
+
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const logoUrl = "./logo.png";
@@ -164,7 +164,7 @@ const Dashboard = () => {
         <head>
           <title>CDA Report</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 20px; padding: 10px; }
+            body { font-family: Arial, sans-serif; margin: 20px; padding: 15px; }
             h1 { text-align: center; color: #333; }
             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
             th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
@@ -236,7 +236,7 @@ const Dashboard = () => {
         <head>
           <title>Registered Streets Report</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 20px; padding: 10px; }
+            body { font-family: Arial, sans-serif; margin: 20px; padding: 15px; }
             h1 { text-align: center; color: #333; }
             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
             th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
@@ -346,12 +346,12 @@ const Dashboard = () => {
 
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210; // A4 width in mm
+      const imgWidth = 180; // A4 width minus 15mm margins on each side
       const pageHeight = 295; // A4 height in mm
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
       let heightLeft = imgHeight;
-      let position = 0;
+      let position = 15; // 15mm top margin
 
       // Add text watermark with 50% opacity centered
       pdf.setFontSize(50);
@@ -359,7 +359,7 @@ const Dashboard = () => {
       pdf.text("Igbogbo/Baiyeku LCDA", 105, 148, { align: "center" });
       pdf.setTextColor(0, 0, 0, 1);
 
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      pdf.addImage(imgData, "PNG", 15, position, imgWidth, imgHeight); // 15mm left margin
       heightLeft -= pageHeight;
 
       while (heightLeft >= 0) {
@@ -372,7 +372,7 @@ const Dashboard = () => {
         pdf.text("Igbogbo/Baiyeku LCDA", 105, 148, { align: "center" });
         pdf.setTextColor(0, 0, 0, 1);
 
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, "PNG", 15, position, imgWidth, imgHeight); // 15mm left margin
         heightLeft -= pageHeight;
       }
 
@@ -408,20 +408,33 @@ const Dashboard = () => {
 
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210; // A4 width in mm
+      const imgWidth = 180; // A4 width minus 15mm margins on each side
       const pageHeight = 295; // A4 height in mm
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
       let heightLeft = imgHeight;
-      let position = 0;
+      let position = 15; // 15mm top margin
 
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      // Add text watermark with 50% opacity centered
+      pdf.setFontSize(50);
+      pdf.setTextColor(200, 200, 200, 0.3);
+      pdf.text("Igbogbo/Baiyeku LCDA", 105, 148, { align: "center" });
+      pdf.setTextColor(0, 0, 0, 1);
+
+      pdf.addImage(imgData, "PNG", 15, position, imgWidth, imgHeight); // 15mm left margin
       heightLeft -= pageHeight;
 
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+
+        // Add text watermark on each page
+        pdf.setFontSize(50);
+        pdf.setTextColor(200, 200, 200, 0.3);
+        pdf.text("Igbogbo/Baiyeku LCDA", 105, 148, { align: "center" });
+        pdf.setTextColor(0, 0, 0, 1);
+
+        pdf.addImage(imgData, "PNG", 15, position, imgWidth, imgHeight); // 15mm left margin
         heightLeft -= pageHeight;
       }
 

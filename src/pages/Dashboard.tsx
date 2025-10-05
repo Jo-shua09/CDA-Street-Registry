@@ -158,6 +158,28 @@ const Dashboard = () => {
   };
 
   const generateCDAReportHTML = () => {
+    // Calculate actual street and property counts for each CDA
+    const cdaStats = cdas.map((cda) => {
+      const cdaStreets = streets.filter((street) => street.cda === cda.name);
+      const streetCount = cdaStreets.length;
+      const propertyCount = cdaStreets.reduce((sum, street) => {
+        const pc = street.propertyCount;
+        if (typeof pc === "object" && pc !== null) {
+          return sum + (pc.houses || 0) + (pc.shops || 0) + (pc.hotels || 0) + (pc.others || 0);
+        }
+        return sum;
+      }, 0);
+
+      return {
+        ...cda,
+        actualStreetCount: streetCount,
+        actualPropertyCount: propertyCount,
+      };
+    });
+
+    const totalStreets = cdaStats.reduce((sum, cda) => sum + cda.actualStreetCount, 0);
+    const totalProperties = cdaStats.reduce((sum, cda) => sum + cda.actualPropertyCount, 0);
+
     return `
       <!DOCTYPE html>
       <html>
@@ -195,7 +217,7 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              ${cdas
+              ${cdaStats
                 .map(
                   (cda, index) => `
                 <tr>
@@ -203,8 +225,8 @@ const Dashboard = () => {
                   <td>${cda.name}</td>
                   <td>${cda.ward}</td>
                   <td>Igbogbo/Baiyeku LCDA</td>
-                  <td>${cda.streetCount}</td>
-                  <td>${cda.propertyCount}</td>
+                  <td>${cda.actualStreetCount}</td>
+                  <td>${cda.actualPropertyCount}</td>
                   <td>${cda.registrationDate || "N/A"}</td>
                 </tr>
               `
@@ -216,8 +238,8 @@ const Dashboard = () => {
           <div class="summary">
             <h3>Summary</h3>
             <p><strong>Total CDAs:</strong> ${cdas.length}</p>
-            <p><strong>Total Streets:</strong> ${cdas.reduce((sum, cda) => sum + cda.streetCount, 0)}</p>
-            <p><strong>Total Properties:</strong> ${cdas.reduce((sum, cda) => sum + cda.propertyCount, 0)}</p>
+            <p><strong>Total Streets:</strong> ${totalStreets}</p>
+            <p><strong>Total Properties:</strong> ${totalProperties}</p>
           </div>
 
           <div class="footer">
@@ -353,24 +375,12 @@ const Dashboard = () => {
       let heightLeft = imgHeight;
       let position = 15; // 15mm top margin
 
-      // Add text watermark with 50% opacity centered
-      pdf.setFontSize(50);
-      pdf.setTextColor(200, 200, 200, 0.3);
-      pdf.text("Igbogbo/Baiyeku LCDA", 105, 148, { align: "center" });
-      pdf.setTextColor(0, 0, 0, 1);
-
       pdf.addImage(imgData, "PNG", 15, position, imgWidth, imgHeight); // 15mm left margin
       heightLeft -= pageHeight;
 
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-
-        // Add text watermark on each page
-        pdf.setFontSize(50);
-        pdf.setTextColor(200, 200, 200, 0.3);
-        pdf.text("Igbogbo/Baiyeku LCDA", 105, 148, { align: "center" });
-        pdf.setTextColor(0, 0, 0, 1);
 
         pdf.addImage(imgData, "PNG", 15, position, imgWidth, imgHeight); // 15mm left margin
         heightLeft -= pageHeight;
@@ -415,24 +425,12 @@ const Dashboard = () => {
       let heightLeft = imgHeight;
       let position = 15; // 15mm top margin
 
-      // Add text watermark with 50% opacity centered
-      pdf.setFontSize(50);
-      pdf.setTextColor(200, 200, 200, 0.3);
-      pdf.text("Igbogbo/Baiyeku LCDA", 105, 148, { align: "center" });
-      pdf.setTextColor(0, 0, 0, 1);
-
       pdf.addImage(imgData, "PNG", 15, position, imgWidth, imgHeight); // 15mm left margin
       heightLeft -= pageHeight;
 
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-
-        // Add text watermark on each page
-        pdf.setFontSize(50);
-        pdf.setTextColor(200, 200, 200, 0.3);
-        pdf.text("Igbogbo/Baiyeku LCDA", 105, 148, { align: "center" });
-        pdf.setTextColor(0, 0, 0, 1);
 
         pdf.addImage(imgData, "PNG", 15, position, imgWidth, imgHeight); // 15mm left margin
         heightLeft -= pageHeight;
@@ -448,6 +446,28 @@ const Dashboard = () => {
 
   // Fallback PDF generation functions
   const generateBasicCDAPDF = () => {
+    // Calculate actual street and property counts for each CDA
+    const cdaStats = cdas.map((cda) => {
+      const cdaStreets = streets.filter((street) => street.cda === cda.name);
+      const streetCount = cdaStreets.length;
+      const propertyCount = cdaStreets.reduce((sum, street) => {
+        const pc = street.propertyCount;
+        if (typeof pc === "object" && pc !== null) {
+          return sum + (pc.houses || 0) + (pc.shops || 0) + (pc.hotels || 0) + (pc.others || 0);
+        }
+        return sum;
+      }, 0);
+
+      return {
+        ...cda,
+        actualStreetCount: streetCount,
+        actualPropertyCount: propertyCount,
+      };
+    });
+
+    const totalStreets = cdaStats.reduce((sum, cda) => sum + cda.actualStreetCount, 0);
+    const totalProperties = cdaStats.reduce((sum, cda) => sum + cda.actualPropertyCount, 0);
+
     const pdf = new jsPDF();
 
     // Title
@@ -472,7 +492,7 @@ const Dashboard = () => {
 
     // Add data rows
     pdf.setFontSize(10);
-    cdas.forEach((cda, index) => {
+    cdaStats.forEach((cda, index) => {
       if (yPosition > 270) {
         pdf.addPage();
         yPosition = 20;
@@ -482,8 +502,8 @@ const Dashboard = () => {
         (index + 1).toString(),
         cda.name.substring(0, 15),
         cda.ward.substring(0, 10),
-        cda.streetCount.toString(),
-        cda.propertyCount.toString(),
+        cda.actualStreetCount.toString(),
+        cda.actualPropertyCount.toString(),
         (cda.registrationDate || "N/A").substring(0, 8),
       ];
 
@@ -502,9 +522,9 @@ const Dashboard = () => {
     pdf.setFontSize(10);
     pdf.text(`Total CDAs: ${cdas.length}`, 20, yPosition);
     yPosition += 6;
-    pdf.text(`Total Streets: ${cdas.reduce((sum, cda) => sum + cda.streetCount, 0)}`, 20, yPosition);
+    pdf.text(`Total Streets: ${totalStreets}`, 20, yPosition);
     yPosition += 6;
-    pdf.text(`Total Properties: ${cdas.reduce((sum, cda) => sum + cda.propertyCount, 0)}`, 20, yPosition);
+    pdf.text(`Total Properties: ${totalProperties}`, 20, yPosition);
 
     pdf.save(`cda-report-${new Date().toISOString().split("T")[0]}.pdf`);
   };

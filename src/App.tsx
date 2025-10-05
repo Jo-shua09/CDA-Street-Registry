@@ -9,9 +9,9 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import CDADirectory from "./pages/CDADirectory";
 import StreetDetails from "./pages/StreetDetails";
-import NotFound from "./pages/NotFound";
 import Loader from "./components/Loader";
 import ErrorBoundary from "./components/ErrorBoundary";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 

@@ -244,7 +244,7 @@ export const PropertyDetails = ({ property, streetName, onClose, onEdit, onDelet
                         onClick={() => setSelectedImage(image.preview)}
                       >
                         <div className="aspect-square bg-muted relative">
-                          <img src={image.preview.startsWith('data:') ? image.preview : image.preview} alt="Property" className="w-full h-full object-cover" />
+                          <img src={image.preview} alt="Property" className="w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center">
                             <Eye className="h-6 w-6 text-white opacity-0 hover:opacity-100 transition-opacity" />
                           </div>

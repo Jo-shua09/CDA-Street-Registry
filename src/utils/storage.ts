@@ -232,10 +232,11 @@ export const convertPropertyForDisplay = (property: StoredProperty): any => {
       ? property.images
           .map((img) => {
             try {
+              const file = base64ToFile(img.fileData, img.fileName, img.fileData.split(";")[0].split(":")[1]);
               return {
                 id: img.id,
-                file: base64ToFile(img.fileData, img.fileName, img.fileData.split(";")[0].split(":")[1]),
-                preview: img.preview,
+                file: file,
+                preview: URL.createObjectURL(file), // Generate new blob URL for preview
               };
             } catch (error) {
               console.error("Error converting image:", error);

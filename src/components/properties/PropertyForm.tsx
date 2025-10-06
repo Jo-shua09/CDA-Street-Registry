@@ -111,25 +111,22 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
     setFormData((prev) => ({ ...prev, shops: updatedShops }));
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newFiles = Array.from(event.target.files || []);
 
-    for (const file of newFiles) {
+    newFiles.forEach((file) => {
       if (file.type.startsWith("image/")) {
         const preview = URL.createObjectURL(file);
-        // Convert to base64 for persistence
-        const base64 = await fileToBase64(file);
-
         setImages((prev) => [
           ...prev,
           {
             id: Math.random().toString(36).substr(2, 9),
             file,
-            preview: base64, // Store base64 instead of object URL
+            preview,
           },
         ]);
       }
-    }
+    });
 
     // Reset file input
     event.target.value = "";
@@ -501,11 +498,7 @@ export const PropertyForm = ({ property, streetName, onSubmit, onClose }: Proper
                     {images.map((image) => (
                       <div key={image.id} className="relative group">
                         <div className="aspect-square bg-muted rounded-lg border overflow-hidden">
-                          <img
-                            src={image.preview.startsWith("data:") ? image.preview : image.preview}
-                            alt="Property"
-                            className="w-full h-full object-cover"
-                          />
+                          <img src={image.preview} alt="Property" className="w-full h-full object-cover" />
                         </div>
                         <Button
                           type="button"

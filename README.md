@@ -5,6 +5,7 @@ A comprehensive web application for managing Community Development Association (
 ## 🌟 Features
 
 ### Core Functionality
+
 - **CDA Management**: Organize and manage multiple Community Development Associations
 - **Street Registration**: Register and track streets within each CDA
 - **Property Tracking**: Monitor residential, commercial, and mixed-use properties
@@ -13,12 +14,14 @@ A comprehensive web application for managing Community Development Association (
 - **Print Reports**: Generate printable reports for CDAs and registered streets
 
 ### User Interface
+
 - **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
 - **Modern UI**: Clean, professional interface using shadcn/ui components
 - **Dark/Light Theme Support**: User-friendly theme switching
 - **Intuitive Navigation**: Easy-to-use dashboard with clear information hierarchy
 
 ### Technical Features
+
 - **Real-time Updates**: Live data synchronization
 - **Form Validation**: Comprehensive input validation and error handling
 - **Data Export**: Export functionality for reports and data analysis
@@ -27,23 +30,27 @@ A comprehensive web application for managing Community Development Association (
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js (v18 or higher)
 - npm or yarn package manager
 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd cda-dwell-admin
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Start the development server**
+
    ```bash
    npm run dev
    ```
@@ -64,7 +71,8 @@ npm run preview
 ## 🛠 Technology Stack
 
 ### Frontend
-- **React 18** - Modern React with hooks and concurrent features
+
+- **React 18.3** - Modern React with hooks and concurrent features
 - **TypeScript** - Type-safe development
 - **Vite** - Fast build tool and development server
 - **Tailwind CSS** - Utility-first CSS framework
@@ -75,6 +83,7 @@ npm run preview
 - **Lucide React** - Beautiful icon library
 
 ### Development Tools
+
 - **ESLint** - Code linting and formatting
 - **TypeScript** - Static type checking
 - **Vite** - Fast development and building
@@ -101,6 +110,7 @@ src/
 ## 🔧 Configuration
 
 ### Environment Variables
+
 Create a `.env` file in the root directory:
 
 ```env
@@ -110,6 +120,7 @@ VITE_ENABLE_ANALYTICS=false
 ```
 
 ### Customization
+
 - **Theme**: Modify `tailwind.config.ts` for custom styling
 - **Components**: Customize components in `src/components/ui/`
 - **Routes**: Add new routes in `src/App.tsx`
@@ -117,6 +128,7 @@ VITE_ENABLE_ANALYTICS=false
 ## 🔒 Security Features
 
 ### Built-in Security
+
 - **Content Security Policy (CSP)**: Prevents XSS attacks
 - **HTTPS Enforcement**: Secure communication
 - **Input Validation**: Client and server-side validation
@@ -125,6 +137,7 @@ VITE_ENABLE_ANALYTICS=false
 - **Secure Headers**: Security headers implementation
 
 ### Best Practices
+
 - Environment variable protection
 - Secure API communication
 - Data sanitization
@@ -133,16 +146,19 @@ VITE_ENABLE_ANALYTICS=false
 ## 🎨 Customization
 
 ### Adding New Components
+
 1. Create component in appropriate directory
 2. Export from index file if needed
 3. Add to component library
 
 ### Styling
+
 - Use Tailwind CSS classes for styling
 - Follow the design system established
 - Maintain consistency with existing components
 
 ### Adding New Pages
+
 1. Create page component in `src/pages/`
 2. Add route in `src/App.tsx`
 3. Update navigation if needed
@@ -150,6 +166,7 @@ VITE_ENABLE_ANALYTICS=false
 ## 📊 Performance
 
 ### Optimization Features
+
 - **Code Splitting**: Automatic route-based code splitting
 - **Lazy Loading**: Components loaded on demand
 - **Tree Shaking**: Unused code elimination
@@ -157,6 +174,7 @@ VITE_ENABLE_ANALYTICS=false
 - **Caching**: Intelligent caching strategies
 
 ### Performance Monitoring
+
 - Built-in performance monitoring
 - Error tracking and reporting
 - User experience metrics
@@ -164,6 +182,7 @@ VITE_ENABLE_ANALYTICS=false
 ## 🧪 Testing
 
 ### Running Tests
+
 ```bash
 # Run unit tests
 npm run test
@@ -176,6 +195,7 @@ npm run test:coverage
 ```
 
 ### Testing Strategy
+
 - Unit tests for components and utilities
 - Integration tests for critical user flows
 - End-to-end tests for complete workflows
@@ -183,12 +203,14 @@ npm run test:coverage
 ## 🚀 Deployment
 
 ### Production Deployment
+
 1. Build the application: `npm run build`
 2. Deploy the `dist` folder to your hosting provider
 3. Configure environment variables
 4. Set up monitoring and analytics
 
 ### Supported Platforms
+
 - Vercel (recommended)
 - Netlify
 - GitHub Pages
@@ -196,6 +218,7 @@ npm run test:coverage
 - Any static hosting provider
 
 ### Environment Configuration
+
 - Production: `VITE_NODE_ENV=production`
 - Development: `VITE_NODE_ENV=development`
 - Staging: `VITE_NODE_ENV=staging`
@@ -203,6 +226,7 @@ npm run test:coverage
 ## 🤝 Contributing
 
 ### Development Setup
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
@@ -210,6 +234,7 @@ npm run test:coverage
 5. Submit a pull request
 
 ### Code Standards
+
 - Follow TypeScript best practices
 - Use ESLint configuration
 - Write meaningful commit messages
@@ -222,12 +247,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🆘 Support
 
 ### Getting Help
+
 - Check the documentation
 - Review existing issues
 - Create a new issue for bugs or feature requests
 - Contact the development team
 
 ### Common Issues
+
 - **Build Errors**: Clear node_modules and reinstall
 - **TypeScript Errors**: Check TypeScript configuration
 - **Styling Issues**: Verify Tailwind CSS setup
@@ -235,12 +262,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔄 Updates and Maintenance
 
 ### Regular Updates
+
 - Keep dependencies updated
 - Monitor security vulnerabilities
 - Update documentation as needed
 - Review and optimize performance
 
 ### Backup Strategy
+
 - Regular database backups
 - Code repository backups
 - Configuration backups
